@@ -1,10 +1,16 @@
 import express, { Express, Request, Response } from "express"
+import cors from "cors"
 
 const app: Express = express()
 const port = 8080
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Typescript + Node.js + Express Server")
+app.use(cors())
+// var cors = require("cors")
+// app.use(cors())
+
+app.get("/summoner", (req, res) => {
+  console.log(req.query.summonerName)
+  // res.json()
 })
 
 app.listen(port, () => {
