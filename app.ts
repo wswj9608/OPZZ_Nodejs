@@ -1,29 +1,35 @@
-import express, { Express, request, Request, Response } from "express"
-import cors from "cors"
+import express from "express"
+import loader from "./loaders"
+import mongodbLoader from "./loaders/mongodb"
+
 import dotenv from "dotenv"
 import summonerRoutes from "./routes/summoner"
+import loaders from "./loaders"
+import { Collection, Db, MongoClient } from "mongodb"
+import { db, getCollection } from "./models"
 
-const app: Express = express()
-const port = 8080
+const DB_CONNECT_URL = process.env.DB_CONNECT_URL as string
 
-const corsOptions = {
-  origin: "*",
-  methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-  preflightContinue: false,
+const startServer = async () => {
+  const app = express()
+  await loaders({ expressApp: app })
+  const port = 8080
 
-  credentials: true,
-  optionsSuccessStatus: 204,
+  MongoClient.connect(DB_CONNECT_URL, (err, client) => {
+    if (err) return console.error(err)
+    if (!client) return
+
+    getCollection(client)
+  })
+
+  dotenv.config()
+  app.use("/summoner", summonerRoutes)
+
+  app.listen(port, () => {
+    console.log(`[server]: Server is running at <https://localhost>:${port}`)
+  })
 }
-
-app.use(cors(corsOptions))
-
-dotenv.config()
-
-// var cors = require("cors")
-// app.use(cors())
-
-app.use("/summoner", summonerRoutes)
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at <https://localhost>:${port}`)
-})
+startServer()
+// export const
+// export const
+// export const
