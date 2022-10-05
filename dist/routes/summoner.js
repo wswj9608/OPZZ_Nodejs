@@ -20,8 +20,9 @@ const s3_1 = require("../config/s3");
 const router = (0, express_1.Router)();
 aws_sdk_1.default.config.update(s3_1.s3Config);
 const s3 = new aws_sdk_1.default.S3();
-const params = { Bucket: "opzz.back" };
-router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const params = { Bucket: 'opzz.back', ContinuationToken: null };
+const pagenator = s3.putBucketAccelerateConfiguration;
+router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const summonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
@@ -38,13 +39,36 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     // res.json()
 }));
-router.get("/profileIcons", (req, res) => {
-    mysql_1.connection.query("SELECT * FROM profile_icon", (err, result) => {
-        console.log(result);
+const getObject = (s3Params) => __awaiter(void 0, void 0, void 0, function* () {
+    let objects = [];
+    let res;
+    try {
+        do {
+            res = yield s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => {
+                var _a;
+                objects = objects.concat((_a = data.Contents) === null || _a === void 0 ? void 0 : _a.slice(1));
+                if (data.IsTruncated) {
+                    s3Params.ContinuationToken = data.NextContinuationToken;
+                }
+            });
+        } while (res.IsTruncated);
+        console.log(objects);
+        return objects;
+    }
+    catch (err) {
+        console.error(err);
+    }
+});
+router.get('/profileIcons', (req, res) => {
+    mysql_1.connection.query('SELECT * FROM profile_icon', (err, result) => {
+        // console.log(result)
     });
-    s3.listObjectsV2({ Bucket: "opzz.back" }, (err, data) => {
+    s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => __awaiter(void 0, void 0, void 0, function* () {
         const contents = data.Contents;
-        console.log(contents === null || contents === void 0 ? void 0 : contents.length);
+        // const isTruncated = data.IsTruncated
+        const test = yield getObject(params);
+        console.log(test);
+        console.log(test === null || test === void 0 ? void 0 : test.length);
         // contents?.forEach((el, i) => {
         //   if (!el.Key) return
         //   s3.getSignedUrl("getObject", { ...params, Key: el.Key }, (err, data) => {
@@ -59,9 +83,9 @@ router.get("/profileIcons", (req, res) => {
         //     // )
         //   })
         // })
-    });
+    }));
 });
-router.get("/by-name/:summonerName", (req, res) => {
+router.get('/by-name/:summonerName', (req, res) => {
     console.log(req);
 });
 exports.default = router;

@@ -1,20 +1,21 @@
-import { Router } from "express"
-import axios from "axios"
-import { getSummonerPuuid } from "../lib/api/summoner"
-import AWS from "aws-sdk"
-import { GetObjectRequest } from "aws-sdk/clients/s3"
-import { encode } from "punycode"
-import { connection as OPZZ } from "../loaders/mysql"
-import { s3Config } from "../config/s3"
+import { Router } from 'express'
+import axios from 'axios'
+import { getSummonerPuuid } from '../lib/api/summoner'
+import AWS from 'aws-sdk'
+import { GetObjectRequest } from 'aws-sdk/clients/s3'
+import { encode } from 'punycode'
+import { connection as OPZZ } from '../loaders/mysql'
+import { s3Config } from '../config/s3'
 
 const router = Router()
 
 AWS.config.update(s3Config)
 
 const s3 = new AWS.S3()
-const params = { Bucket: "opzz.back" }
+const params = { Bucket: 'opzz.back', ContinuationToken: null }
+const pagenator = s3.putBucketAccelerateConfiguration
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const summonerName = encodeURI(req.query.summonerName as string)
 
@@ -38,14 +39,37 @@ router.get("/", async (req, res) => {
   // res.json()
 })
 
-router.get("/profileIcons", (req, res) => {
-  OPZZ.query("SELECT * FROM profile_icon", (err, result) => {
-    console.log(result)
-  })
-  s3.listObjectsV2({ Bucket: "opzz.back" }, (err, data) => {
-    const contents = data.Contents
+const getObject = async (s3Params: any) => {
+  let objects: any[] = []
+  let res: any
 
-    console.log(contents?.length)
+  try {
+    do {
+      res = await s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => {
+        objects = objects.concat(data.Contents?.slice(1))
+        if (data.IsTruncated) {
+          s3Params.ContinuationToken = data.NextContinuationToken
+        }
+      })
+    } while (res.IsTruncated)
+    console.log(objects)
+    return objects
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+router.get('/profileIcons', (req, res) => {
+  OPZZ.query('SELECT * FROM profile_icon', (err, result) => {
+    // console.log(result)
+  })
+  s3.listObjectsV2({ Bucket: 'opzz.back' }, async (err, data) => {
+    const contents = data.Contents
+    // const isTruncated = data.IsTruncated
+
+    const test = await getObject(params)
+    console.log(test)
+    console.log(test?.length)
 
     // contents?.forEach((el, i) => {
     //   if (!el.Key) return
@@ -65,7 +89,7 @@ router.get("/profileIcons", (req, res) => {
   })
 })
 
-router.get("/by-name/:summonerName", (req, res) => {
+router.get('/by-name/:summonerName', (req, res) => {
   console.log(req)
 })
 
