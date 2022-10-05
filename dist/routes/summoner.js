@@ -15,49 +15,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const summoner_1 = require("../lib/api/summoner");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
-const models_1 = require("../models");
+const mysql_1 = require("../loaders/mysql");
+const s3_1 = require("../config/s3");
 const router = (0, express_1.Router)();
-console.log('MongoDb Intialized');
-aws_sdk_1.default.config.update({
-    region: 'ap-northeast-2',
-    accessKeyId: process.env.S3_ACCESS_KEY,
-    secretAccessKey: process.env.S3_PRIVATE_ACCESS_KEY,
-});
+aws_sdk_1.default.config.update(s3_1.s3Config);
 const s3 = new aws_sdk_1.default.S3();
-const params = { Bucket: 'opzz.back' };
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const params = { Bucket: "opzz.back" };
+router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const summonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
-        models_1.profileIcons.findOne({ fileName: `${profileIconId}.png` }, (err, result) => {
-            res.json({
-                profileImageUrl: result === null || result === void 0 ? void 0 : result.imageUrl,
-                id,
-                name,
-                summonerLevel,
-                puuid,
-            });
-        });
         // 소환사명
         // 레벨
         // 소환사 아이콘
         // s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => {
         //   const contents = data.Contents
-        //   contents?.forEach((el, i) => {
-        //     if (!el.Key) return
-        //     s3.getSignedUrl(
-        //       'getObject',
-        //       { ...params, Key: el.Key },
-        //       (err, data) => {
-        //         profileIcons.insertOne({
-        //           _id: i + 1,
-        //           fileName: el.Key?.split('/')[1] as string,
-        //           imageUrl: data,
-        //         })
-        //         addCounter('profileIcons')
-        //       }
-        //     )
-        //   })
         // })
         // res.json(summonerInfo)
     }
@@ -66,7 +38,30 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     // res.json()
 }));
-router.get('/by-name/:summonerName', (req, res) => {
+router.get("/profileIcons", (req, res) => {
+    mysql_1.connection.query("SELECT * FROM profile_icon", (err, result) => {
+        console.log(result);
+    });
+    s3.listObjectsV2({ Bucket: "opzz.back" }, (err, data) => {
+        const contents = data.Contents;
+        console.log(contents === null || contents === void 0 ? void 0 : contents.length);
+        // contents?.forEach((el, i) => {
+        //   if (!el.Key) return
+        //   s3.getSignedUrl("getObject", { ...params, Key: el.Key }, (err, data) => {
+        //     const sql = "INSERT INTO profile_icon SET ?"
+        //     // OPZZ.query(
+        //     //   sql,
+        //     //   { image_url: data, file_name: el.Key?.split("/")[1] as string },
+        //     //   (err, result) => {
+        //     //     if (err) return
+        //     //     console.log(result)
+        //     //   }
+        //     // )
+        //   })
+        // })
+    });
+});
+router.get("/by-name/:summonerName", (req, res) => {
     console.log(req);
 });
 exports.default = router;

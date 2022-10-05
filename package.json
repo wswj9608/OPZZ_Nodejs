@@ -19,12 +19,14 @@
     "express": "^4.18.1",
     "global": "^4.4.0",
     "mongodb": "^4.9.1",
+    "mysql": "^2.18.1",
     "typescript": "^4.8.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",
     "@babel/preset-env": "^7.19.3",
     "@types/cors": "^2.8.12",
+    "@types/mysql": "^2.15.21",
     "concurrently": "^7.4.0",
     "nodemon": "^2.0.20"
   },

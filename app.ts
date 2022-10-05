@@ -1,28 +1,24 @@
 import express from "express"
 import loader from "./loaders"
-import mongodbLoader from "./loaders/mongodb"
 
 import dotenv from "dotenv"
 import summonerRoutes from "./routes/summoner"
 import loaders from "./loaders"
 import { Collection, Db, MongoClient } from "mongodb"
-import { db, getCollection } from "./models"
+import { envData } from "./config"
 
-const DB_CONNECT_URL = process.env.DB_CONNECT_URL as string
-
+const { port } = envData
 const startServer = async () => {
   const app = express()
   await loaders({ expressApp: app })
-  const port = 8080
 
-  MongoClient.connect(DB_CONNECT_URL, (err, client) => {
-    if (err) return console.error(err)
-    if (!client) return
+  // MongoClient.connect(DB_CONNECT_URL, (err, client) => {
+  //   if (err) return console.error(err)
+  //   if (!client) return
 
-    getCollection(client)
-  })
+  //   getCollection(client)
+  // })
 
-  dotenv.config()
   app.use("/summoner", summonerRoutes)
 
   app.listen(port, () => {

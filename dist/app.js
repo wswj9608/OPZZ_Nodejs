@@ -13,24 +13,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const summoner_1 = __importDefault(require("./routes/summoner"));
 const loaders_1 = __importDefault(require("./loaders"));
-const mongodb_1 = require("mongodb");
-const models_1 = require("./models");
-const DB_CONNECT_URL = process.env.DB_CONNECT_URL;
+const config_1 = require("./config");
+const { port } = config_1.envData;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     yield (0, loaders_1.default)({ expressApp: app });
-    const port = 8080;
-    mongodb_1.MongoClient.connect(DB_CONNECT_URL, (err, client) => {
-        if (err)
-            return console.error(err);
-        if (!client)
-            return;
-        (0, models_1.getCollection)(client);
-    });
-    dotenv_1.default.config();
+    // MongoClient.connect(DB_CONNECT_URL, (err, client) => {
+    //   if (err) return console.error(err)
+    //   if (!client) return
+    //   getCollection(client)
+    // })
     app.use("/summoner", summoner_1.default);
     app.listen(port, () => {
         console.log(`[server]: Server is running at <https://localhost>:${port}`);
