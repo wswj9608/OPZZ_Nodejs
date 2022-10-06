@@ -25,13 +25,14 @@ const getObject = (s3Params) => {
             (0, exports.getObject)(params);
         }
         else {
+            console.log(objects.length);
             objects === null || objects === void 0 ? void 0 : objects.forEach((el, i) => {
                 if (!el.Key)
                     return;
-                console.log(i);
                 s3.getSignedUrl("getObject", { Bucket: "opzz.back", Key: el.Key }, (err, data) => {
                     var _a;
-                    mysql_1.connection.query(models_1.insertProfileIcons, { image_url: data, file_name: (_a = el.Key) === null || _a === void 0 ? void 0 : _a.split("/")[1] }, (err, result) => {
+                    const image_url = data.split("?")[0];
+                    mysql_1.connection.query(models_1.insertProfileIcons, { image_url, file_name: (_a = el.Key) === null || _a === void 0 ? void 0 : _a.split("/")[1] }, (err, result) => {
                         if (err)
                             return;
                         console.log(result);
@@ -43,18 +44,13 @@ const getObject = (s3Params) => {
 };
 exports.getObject = getObject;
 const getProfileUrl = (fileName) => {
-    console.log(fileName);
-    let fileUrl;
     return new Promise((resolve, reject) => {
         mysql_1.connection.query(models_1.getProfileUrlQuery, fileName, (err, result) => {
             if (err) {
                 reject(err);
             }
-            console.log("result ====>", result);
-            fileUrl = result;
-            resolve(result);
+            resolve(result[0].image_url);
         });
     });
-    // return fileUrl
 };
 exports.getProfileUrl = getProfileUrl;

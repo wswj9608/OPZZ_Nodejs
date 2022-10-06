@@ -15,21 +15,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const summoner_1 = require("../lib/api/summoner");
 const services_1 = __importDefault(require("../services"));
+const profileIconService_1 = require("../services/profileIconService");
 const router = (0, express_1.Router)();
-const { getObject, params } = services_1.default.summoner;
+const { getObject, params } = services_1.default.profileIconService;
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const summonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
-        // 소환사명
-        // 레벨
-        // 소환사 아이콘
-        // res.json(summonerInfo)
+        const profileIconImageUrl = yield (0, profileIconService_1.getProfileUrl)(String(profileIconId));
+        const resData = {
+            name,
+            id,
+            puuid,
+            summonerLevel,
+            imageUrl: profileIconImageUrl || null,
+        };
+        res.json(resData);
     }
     catch (err) {
         console.error(err);
     }
-    // res.json()
 }));
 router.get("/profileIcons", (req, res) => {
     getObject(params);

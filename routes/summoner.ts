@@ -1,10 +1,11 @@
 import { Router } from "express"
 import { getSummonerPuuid } from "../lib/api/summoner"
 import services from "../services"
+import { getProfileUrl } from "../services/profileIconService"
 
 const router = Router()
 
-const { getObject, params } = services.summoner
+const { getObject, params } = services.profileIconService
 
 router.get("/", async (req, res) => {
   try {
@@ -13,16 +14,20 @@ router.get("/", async (req, res) => {
     const { name, id, puuid, summonerLevel, profileIconId }: SummonerInfoType =
       await getSummonerPuuid(summonerName)
 
-    // 소환사명
-    // 레벨
-    // 소환사 아이콘
+    const profileIconImageUrl = await getProfileUrl(String(profileIconId))
 
-    // res.json(summonerInfo)
+    const resData = {
+      name,
+      id,
+      puuid,
+      summonerLevel,
+      imageUrl: profileIconImageUrl || null,
+    }
+
+    res.json(resData)
   } catch (err) {
     console.error(err)
   }
-
-  // res.json()
 })
 
 router.get("/profileIcons", (req, res) => {

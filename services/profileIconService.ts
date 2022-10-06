@@ -1,6 +1,7 @@
 import AWS from "aws-sdk"
 import { s3Config } from "../config/s3"
 import { connection as OPZZ } from "../loaders/mysql"
+import { getProfileUrlQuery, insertProfileIcons } from "../models"
 
 AWS.config.update(s3Config)
 const s3 = new AWS.S3()
@@ -21,17 +22,17 @@ export const getObject = (s3Params: any) => {
       params.ContinuationToken = data.NextContinuationToken
       getObject(params)
     } else {
+      console.log(objects.length)
       objects?.forEach((el, i) => {
         if (!el.Key) return
-        console.log(i)
         s3.getSignedUrl(
           "getObject",
           { Bucket: "opzz.back", Key: el.Key },
           (err, data) => {
-            const sql = "INSERT INTO profile_icon SET ?"
+            const image_url = data.split("?")[0]
             OPZZ.query(
-              sql,
-              { image_url: data, file_name: el.Key?.split("/")[1] as string },
+              insertProfileIcons,
+              { image_url, file_name: el.Key?.split("/")[1] as string },
               (err, result) => {
                 if (err) return
                 console.log(result)
@@ -41,5 +42,16 @@ export const getObject = (s3Params: any) => {
         )
       })
     }
+  })
+}
+
+export const getProfileUrl = (fileName: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    OPZZ.query(getProfileUrlQuery, fileName, (err, result) => {
+      if (err) {
+        reject(err)
+      }
+      resolve(result[0].image_url)
+    })
   })
 }

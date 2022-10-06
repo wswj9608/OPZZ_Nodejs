@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const summnoer_1 = require("./summnoer");
+const profileIconService_1 = require("./profileIconService");
 exports.default = {
-    summoner: { params: summnoer_1.params, getObject: summnoer_1.getObject },
+    profileIconService: { params: profileIconService_1.params, getObject: profileIconService_1.getObject },
 };

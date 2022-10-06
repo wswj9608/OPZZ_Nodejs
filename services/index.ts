@@ -1,5 +1,5 @@
-import { params, getObject } from "./summnoer"
+import { params, getObject } from "./profileIconService"
 
 export default {
-  summoner: { params, getObject },
+  profileIconService: { params, getObject },
 }
