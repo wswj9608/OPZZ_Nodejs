@@ -14,24 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const summoner_1 = require("../lib/api/summoner");
-const aws_sdk_1 = __importDefault(require("aws-sdk"));
-const mysql_1 = require("../loaders/mysql");
-const s3_1 = require("../config/s3");
+const services_1 = __importDefault(require("../services"));
 const router = (0, express_1.Router)();
-aws_sdk_1.default.config.update(s3_1.s3Config);
-const s3 = new aws_sdk_1.default.S3();
-const params = { Bucket: 'opzz.back', ContinuationToken: null };
-const pagenator = s3.putBucketAccelerateConfiguration;
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const { getObject, params } = services_1.default.summoner;
+router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const summonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
         // 소환사명
         // 레벨
         // 소환사 아이콘
-        // s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => {
-        //   const contents = data.Contents
-        // })
         // res.json(summonerInfo)
     }
     catch (err) {
@@ -39,53 +31,10 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     // res.json()
 }));
-const getObject = (s3Params) => __awaiter(void 0, void 0, void 0, function* () {
-    let objects = [];
-    let res;
-    try {
-        do {
-            res = yield s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => {
-                var _a;
-                objects = objects.concat((_a = data.Contents) === null || _a === void 0 ? void 0 : _a.slice(1));
-                if (data.IsTruncated) {
-                    s3Params.ContinuationToken = data.NextContinuationToken;
-                }
-            });
-        } while (res.IsTruncated);
-        console.log(objects);
-        return objects;
-    }
-    catch (err) {
-        console.error(err);
-    }
+router.get("/profileIcons", (req, res) => {
+    getObject(params);
 });
-router.get('/profileIcons', (req, res) => {
-    mysql_1.connection.query('SELECT * FROM profile_icon', (err, result) => {
-        // console.log(result)
-    });
-    s3.listObjectsV2({ Bucket: 'opzz.back' }, (err, data) => __awaiter(void 0, void 0, void 0, function* () {
-        const contents = data.Contents;
-        // const isTruncated = data.IsTruncated
-        const test = yield getObject(params);
-        console.log(test);
-        console.log(test === null || test === void 0 ? void 0 : test.length);
-        // contents?.forEach((el, i) => {
-        //   if (!el.Key) return
-        //   s3.getSignedUrl("getObject", { ...params, Key: el.Key }, (err, data) => {
-        //     const sql = "INSERT INTO profile_icon SET ?"
-        //     // OPZZ.query(
-        //     //   sql,
-        //     //   { image_url: data, file_name: el.Key?.split("/")[1] as string },
-        //     //   (err, result) => {
-        //     //     if (err) return
-        //     //     console.log(result)
-        //     //   }
-        //     // )
-        //   })
-        // })
-    }));
-});
-router.get('/by-name/:summonerName', (req, res) => {
+router.get("/by-name/:summonerName", (req, res) => {
     console.log(req);
 });
 exports.default = router;
