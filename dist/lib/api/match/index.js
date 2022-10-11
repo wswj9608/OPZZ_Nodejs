@@ -9,12 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSummonerPuuid = void 0;
+exports.getSummonerMatches = void 0;
 const common_1 = require("../common");
-const BASE_URL = "/lol/summoner/v4/summoners";
-const getSummonerPuuid = (summonerName) => __awaiter(void 0, void 0, void 0, function* () {
-    const res = yield common_1.riotClient.get(`${BASE_URL}/by-name/${summonerName}`);
-    console.log(`${BASE_URL}/by-name/${summonerName}`);
-    return res.data;
+const BASE_URL = "https://asia.api.riotgames.com/lol/match/v5/matches";
+const getSummonerMatches = (puuid) => __awaiter(void 0, void 0, void 0, function* () {
+    const { data: matchIds } = yield common_1.riotClient.get(`${BASE_URL}/by-puuid/${puuid}/ids?start=0&count=3
+  `);
+    let test;
+    for (let i = 0; i > matchIds.length; i++) {
+        const a = yield common_1.riotClient.get(`${BASE_URL}/${matchIds[i]}`);
+        console.log(a);
+    }
+    console.log(test);
+    return test;
 });
-exports.getSummonerPuuid = getSummonerPuuid;
+exports.getSummonerMatches = getSummonerMatches;

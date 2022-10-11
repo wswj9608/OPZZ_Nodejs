@@ -10,12 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSummonerProfile = void 0;
+const match_1 = require("../lib/api/match");
 const summoner_1 = require("../lib/api/summoner");
 const profileIconService_1 = require("../services/profileIconService");
 const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const summonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
+        const data = yield (0, match_1.getSummonerMatches)(puuid);
+        console.log(data);
         const profileIconImageUrl = yield (0, profileIconService_1.getProfileUrl)(String(profileIconId));
         const resData = {
             name,

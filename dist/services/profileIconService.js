@@ -25,7 +25,6 @@ const getObject = (s3Params) => {
             (0, exports.getObject)(params);
         }
         else {
-            console.log(objects.length);
             objects === null || objects === void 0 ? void 0 : objects.forEach((el, i) => {
                 if (!el.Key)
                     return;

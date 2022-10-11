@@ -1,4 +1,5 @@
 import { RequestHandler } from "express"
+import { getSummonerMatches } from "../lib/api/match"
 import { getSummonerPuuid } from "../lib/api/summoner"
 import { getProfileUrl } from "../services/profileIconService"
 
@@ -8,6 +9,8 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
 
     const { name, id, puuid, summonerLevel, profileIconId }: SummonerInfoType =
       await getSummonerPuuid(summonerName)
+    const data = await getSummonerMatches(puuid)
+    console.log(data)
 
     const profileIconImageUrl = await getProfileUrl(String(profileIconId))
 

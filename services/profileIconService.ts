@@ -22,7 +22,6 @@ export const getObject = (s3Params: any) => {
       params.ContinuationToken = data.NextContinuationToken
       getObject(params)
     } else {
-      console.log(objects.length)
       objects?.forEach((el, i) => {
         if (!el.Key) return
         s3.getSignedUrl(
