@@ -13,14 +13,14 @@ exports.getSummonerMatches = void 0;
 const common_1 = require("../common");
 const BASE_URL = "https://asia.api.riotgames.com/lol/match/v5/matches";
 const getSummonerMatches = (puuid) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("puuid ====>", puuid);
     const { data: matchIds } = yield common_1.riotClient.get(`${BASE_URL}/by-puuid/${puuid}/ids?start=0&count=3
   `);
-    let test;
-    for (let i = 0; i > matchIds.length; i++) {
-        const a = yield common_1.riotClient.get(`${BASE_URL}/${matchIds[i]}`);
-        console.log(a);
+    let matchInfos = [];
+    for (let i = 0; i < matchIds.length; i++) {
+        const { data } = yield common_1.riotClient.get(`${BASE_URL}/${matchIds[i]}`);
+        matchInfos.push(data.info);
     }
-    console.log(test);
-    return test;
+    return matchInfos;
 });
 exports.getSummonerMatches = getSummonerMatches;
