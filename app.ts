@@ -6,6 +6,7 @@ import summonerRoutes from "./routes/summoner"
 import loaders from "./loaders"
 import { Collection, Db, MongoClient } from "mongodb"
 import { envData } from "./config"
+import formidableMiddleware from "express-formidable"
 
 const { port } = envData
 const startServer = async () => {

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  </head>
+  <body>
+    <p>S3에 저장 된 ProfileIcons DB 업로드</p>
+    <button class="btn btn-danger" id="icon-save-button">Save</button>
+    <p>ChampionIcons S3, DB 업로드</p>
+    <input type="file" multiple id="file-input" />
+    <!-- <input type="file" id="file-input" /> -->
+    <button class="btn btn-danger" id="champ-icon-save-button">Save</button>
+    <script>
+      $("#champ-icon-save-button").click(async function (e) {
+        const files = $("#file-input")[0].files
+        const formData = new FormData()
+
+        // const appendFormData = () => {
+        //   return new Promise((resolve) => {
+        //     const formData = new FormData()
+        //     console.log(files.length)
+
+        //     for (let i = 0; i < files.length; i++) {
+        //       formData.append("image", files[i])
+        //     }
+        //     resolve(formData)
+        //   })
+        // }
+
+        Array.from(files).forEach((file) => formData.append("champIcon", file))
+
+        // const champIcons = await appendFormData()
+        // formData.append("image", files)
+        console.log(formData.getAll("champIcon"))
+
+        $.ajax({
+          contentType: false,
+          processData: false,
+          method: "POST",
+          url: "/summoner/champIcons",
+          data: formData,
+        })
+      })
+
+      $("#icon-save-button").click(function (e) {
+        $.ajax({
+          method: "GET",
+          url: "/summoner/profileIcons",
+        })
+      })
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

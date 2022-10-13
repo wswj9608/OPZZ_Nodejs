@@ -14,7 +14,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
     const profileIconImageUrl = await getProfileUrl(String(profileIconId))
 
     const matchInfosData = riotMatchInfos.map((info) => {
-      const parti = info.participants.map((participant) => {
+      const gameData = info.participants.map((participant) => {
         const {
           kills,
           assists,
@@ -59,7 +59,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
         gameDuration: new Date(info.gameDuration + 1000)
           .toISOString()
           .slice(14, 19),
-        ...parti,
+        gameData,
       }
 
       return matchInfos
