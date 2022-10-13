@@ -21,7 +21,8 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const profileIconImageUrl = yield (0, profileIconService_1.getProfileUrl)(String(profileIconId));
         const matchInfosData = riotMatchInfos.map((info) => {
             const gameData = info.participants.map((participant) => {
-                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, visionWardsBoughtInGame, neutralMinionsKilled, totalMinionsKilled, } = participant;
+                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, visionWardsBoughtInGame, neutralMinionsKilled, totalMinionsKilled, summoner1Id, summoner2Id, summonerSpells, } = participant;
+                // console.log('getSummonerSpellIcon ========>', summonerSpells)
                 const participantData = {
                     kills,
                     assists,
@@ -32,9 +33,13 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     visionWardsBoughtInGame,
                     totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
                     minionsPerMinute: (totalMinionsKilled + neutralMinionsKilled) / 60,
+                    summoner1Id,
+                    summoner2Id,
                 };
                 return participantData;
             });
+            // 여따가 db 가져오는거 넣어봐야지
+            // console.log(gameData)
             const matchInfos = {
                 gameEndTimestamp: new Date(info.gameDuration)
                     .toISOString()

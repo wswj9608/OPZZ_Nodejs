@@ -1,7 +1,8 @@
-import { RequestHandler } from "express"
-import { getSummonerMatches } from "../lib/api/match"
-import { getSummonerPuuid } from "../lib/api/summoner"
-import { getProfileUrl } from "../services/profileIconService"
+import { RequestHandler } from 'express'
+import { getSummonerMatches } from '../lib/api/match'
+import { getSummonerPuuid } from '../lib/api/summoner'
+import { getSummonerSpellIcons } from '../services/iconService'
+import { getProfileUrl } from '../services/profileIconService'
 
 export const getSummonerProfile: RequestHandler = async (req, res) => {
   try {
@@ -35,7 +36,12 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
           visionWardsBoughtInGame,
           neutralMinionsKilled,
           totalMinionsKilled,
+          summoner1Id,
+          summoner2Id,
+          summonerSpells,
         } = participant
+
+        // console.log('getSummonerSpellIcon ========>', summonerSpells)
 
         const participantData = {
           kills,
@@ -47,10 +53,15 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
           visionWardsBoughtInGame,
           totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
           minionsPerMinute: (totalMinionsKilled + neutralMinionsKilled) / 60,
+          summoner1Id,
+          summoner2Id,
         }
 
         return participantData
       })
+
+      // 여따가 db 가져오는거 넣어봐야지
+      // console.log(gameData)
 
       const matchInfos = {
         gameEndTimestamp: new Date(info.gameDuration)

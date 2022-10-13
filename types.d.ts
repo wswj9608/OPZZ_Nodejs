@@ -21,6 +21,7 @@ interface MatchInfoType {
   gameId: number
   mapId: number
   participants: {
+    summonerSpells: any[]
     assists: number
     champLevel: number
     championId: number
