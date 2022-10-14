@@ -12,45 +12,49 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSummonerProfile = void 0;
 const match_1 = require("../lib/api/match");
 const summoner_1 = require("../lib/api/summoner");
+const iconService_1 = require("../services/iconService");
 const profileIconService_1 = require("../services/profileIconService");
+const utills_1 = require("../utills");
 const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const summonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
         const riotMatchInfos = yield (0, match_1.getSummonerMatches)(puuid);
         const profileIconImageUrl = yield (0, profileIconService_1.getProfileUrl)(String(profileIconId));
-        const matchInfosData = riotMatchInfos.map((info) => {
-            const gameData = info.participants.map((participant) => {
-                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, visionWardsBoughtInGame, neutralMinionsKilled, totalMinionsKilled, summoner1Id, summoner2Id, summonerSpells, } = participant;
-                // console.log('getSummonerSpellIcon ========>', summonerSpells)
+        const matchInfosData = yield Promise.all(riotMatchInfos.map((info) => __awaiter(void 0, void 0, void 0, function* () {
+            const gameData = yield Promise.all(info.participants.map((participant) => __awaiter(void 0, void 0, void 0, function* () {
+                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, visionWardsBoughtInGame, neutralMinionsKilled, totalMinionsKilled, summoner1Id, summoner2Id, } = participant;
+                const summonerSpells = yield (0, iconService_1.getSummonerSpellIcons)(summoner1Id, summoner2Id);
+                const { image_url } = yield (0, iconService_1.getChapmIcon)(championName);
                 const participantData = {
                     kills,
                     assists,
                     deaths,
-                    championName,
+                    champion: { image_url, championName },
                     champLevel,
                     items: [item0, item1, item2, item3, item4, item5, item6],
                     visionWardsBoughtInGame,
                     totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
                     minionsPerMinute: (totalMinionsKilled + neutralMinionsKilled) / 60,
-                    summoner1Id,
-                    summoner2Id,
+                    summonerSpells: [
+                        summonerSpells.find((el) => el.spell_id === summoner1Id),
+                        summonerSpells.find((el) => el.spell_id === summoner2Id),
+                    ],
                 };
                 return participantData;
-            });
+            })));
             // 여따가 db 가져오는거 넣어봐야지
             // console.log(gameData)
+            console.log(info.gameDuration);
             const matchInfos = {
-                gameEndTimestamp: new Date(info.gameDuration)
-                    .toISOString()
-                    .slice(14, 19),
-                gameDuration: new Date(info.gameDuration + 1000)
+                gameEndTimestamp: (0, utills_1.timeForToday)(new Date(info.gameEndTimestamp)),
+                gameDuration: new Date(info.gameDuration * 1000 + 1000)
                     .toISOString()
                     .slice(14, 19),
                 gameData,
             };
             return matchInfos;
-        });
+        })));
         const resData = {
             name,
             id,

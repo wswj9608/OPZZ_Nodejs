@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSummonerSpellIcons = exports.uploadIcons = void 0;
+exports.getChapmIcon = exports.getSummonerSpellIcons = exports.uploadIcons = void 0;
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
 const s3_1 = require("../config/s3");
 const mysql_1 = require("../loaders/mysql");
@@ -36,8 +36,20 @@ const getSummonerSpellIcons = (spellId1, spellId2) => {
         mysql_1.connection.query(`SELECT image_url,spell_id,file_name FROM spell_icon WHERE spell_id = ? || spell_id = ?`, [String(spellId1), String(spellId2)], (err, result) => {
             if (err)
                 reject(err);
+            console.log("spellIcons db result ===========>", result);
             resolve(result);
         });
     });
 };
 exports.getSummonerSpellIcons = getSummonerSpellIcons;
+const getChapmIcon = (champName) => {
+    return new Promise((resolve, reject) => {
+        mysql_1.connection.query(`SELECT image_url FROM champ_icon WHERE SUBSTRING_INDEX(file_name, '.', 1) = ?`, champName, (err, result) => {
+            if (err)
+                reject(err);
+            console.log("spellIcons db result ===========>", result);
+            resolve(result[0]);
+        });
+    });
+};
+exports.getChapmIcon = getChapmIcon;

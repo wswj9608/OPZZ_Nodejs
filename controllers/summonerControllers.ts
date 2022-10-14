@@ -1,8 +1,9 @@
-import { RequestHandler } from 'express'
-import { getSummonerMatches } from '../lib/api/match'
-import { getSummonerPuuid } from '../lib/api/summoner'
-import { getSummonerSpellIcons } from '../services/iconService'
-import { getProfileUrl } from '../services/profileIconService'
+import { RequestHandler } from "express"
+import { getSummonerMatches } from "../lib/api/match"
+import { getSummonerPuuid } from "../lib/api/summoner"
+import { getChapmIcon, getSummonerSpellIcons } from "../services/iconService"
+import { getProfileUrl } from "../services/profileIconService"
+import { timeForToday } from "../utills"
 
 export const getSummonerProfile: RequestHandler = async (req, res) => {
   try {
@@ -14,67 +15,78 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
 
     const profileIconImageUrl = await getProfileUrl(String(profileIconId))
 
-    const matchInfosData = riotMatchInfos.map((info) => {
-      const gameData = info.participants.map((participant) => {
-        const {
-          kills,
-          assists,
-          deaths,
-          doubleKills,
-          tripleKills,
-          quadraKills,
-          pentaKills,
-          championName,
-          champLevel,
-          item0,
-          item1,
-          item2,
-          item3,
-          item4,
-          item5,
-          item6,
-          visionWardsBoughtInGame,
-          neutralMinionsKilled,
-          totalMinionsKilled,
-          summoner1Id,
-          summoner2Id,
-          summonerSpells,
-        } = participant
+    const matchInfosData = await Promise.all(
+      riotMatchInfos.map(async (info) => {
+        const gameData = await Promise.all(
+          info.participants.map(async (participant) => {
+            const {
+              kills,
+              assists,
+              deaths,
+              doubleKills,
+              tripleKills,
+              quadraKills,
+              pentaKills,
+              championName,
+              champLevel,
+              item0,
+              item1,
+              item2,
+              item3,
+              item4,
+              item5,
+              item6,
+              visionWardsBoughtInGame,
+              neutralMinionsKilled,
+              totalMinionsKilled,
+              summoner1Id,
+              summoner2Id,
+            } = participant
 
-        // console.log('getSummonerSpellIcon ========>', summonerSpells)
+            const summonerSpells = await getSummonerSpellIcons(
+              summoner1Id,
+              summoner2Id
+            )
 
-        const participantData = {
-          kills,
-          assists,
-          deaths,
-          championName,
-          champLevel,
-          items: [item0, item1, item2, item3, item4, item5, item6],
-          visionWardsBoughtInGame,
-          totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
-          minionsPerMinute: (totalMinionsKilled + neutralMinionsKilled) / 60,
-          summoner1Id,
-          summoner2Id,
+            const { image_url } = await getChapmIcon(championName)
+
+            const participantData = {
+              kills,
+              assists,
+              deaths,
+              champion: { image_url, championName },
+              champLevel,
+              items: [item0, item1, item2, item3, item4, item5, item6],
+              visionWardsBoughtInGame,
+              totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
+              minionsPerMinute:
+                (totalMinionsKilled + neutralMinionsKilled) / 60,
+              summonerSpells: [
+                summonerSpells.find((el) => el.spell_id === summoner1Id),
+                summonerSpells.find((el) => el.spell_id === summoner2Id),
+              ],
+            }
+
+            return participantData
+          })
+        )
+
+        // 여따가 db 가져오는거 넣어봐야지
+        // console.log(gameData)
+
+        console.log(info.gameDuration)
+
+        const matchInfos = {
+          gameEndTimestamp: timeForToday(new Date(info.gameEndTimestamp)),
+          gameDuration: new Date(info.gameDuration * 1000 + 1000)
+            .toISOString()
+            .slice(14, 19),
+          gameData,
         }
 
-        return participantData
+        return matchInfos
       })
-
-      // 여따가 db 가져오는거 넣어봐야지
-      // console.log(gameData)
-
-      const matchInfos = {
-        gameEndTimestamp: new Date(info.gameDuration)
-          .toISOString()
-          .slice(14, 19),
-        gameDuration: new Date(info.gameDuration + 1000)
-          .toISOString()
-          .slice(14, 19),
-        gameData,
-      }
-
-      return matchInfos
-    })
+    )
 
     const resData = {
       name,

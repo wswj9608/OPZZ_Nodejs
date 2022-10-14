@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk'
-import { s3Config } from '../config/s3'
-import { connection as OPZZ } from '../loaders/mysql'
-import { insertIcons } from '../models'
+import AWS from "aws-sdk"
+import { s3Config } from "../config/s3"
+import { connection as OPZZ } from "../loaders/mysql"
+import { insertIcons } from "../models"
 
 AWS.config.update(s3Config)
 const s3 = new AWS.S3()
@@ -32,8 +32,24 @@ export const getSummonerSpellIcons = (
       [String(spellId1), String(spellId2)],
       (err, result) => {
         if (err) reject(err)
-
+        console.log("spellIcons db result ===========>", result)
         resolve(result)
+      }
+    )
+  })
+}
+
+export const getChapmIcon = (
+  champName: string
+): Promise<{ image_url: string; file_name: string }> => {
+  return new Promise((resolve, reject) => {
+    OPZZ.query(
+      `SELECT image_url FROM champ_icon WHERE SUBSTRING_INDEX(file_name, '.', 1) = ?`,
+      champName,
+      (err, result) => {
+        if (err) reject(err)
+        console.log("spellIcons db result ===========>", result)
+        resolve(result[0])
       }
     )
   })
