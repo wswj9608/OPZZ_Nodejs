@@ -13,22 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const summonerControllers_1 = require("../controllers/summonerControllers");
+const summoner_1 = require("../controllers/summoner");
 const services_1 = __importDefault(require("../services"));
 const multer_1 = __importDefault(require("multer"));
 const fs_1 = require("fs");
 const iconService_1 = require("../services/iconService");
 const router = (0, express_1.Router)();
-const upload = (0, multer_1.default)({ dest: 'uploads/' });
+const upload = (0, multer_1.default)({ dest: "uploads/" });
 const { getObject, params } = services_1.default.profileIconService;
-router.get('/', summonerControllers_1.getSummonerProfile);
+router.get("/", summoner_1.getSummonerProfile);
 router.get(`/imageUpload`, (req, res) => {
-    res.render('imageUpload.ejs');
+    res.render("imageUpload.ejs");
 });
-router.get('/profileIcons', (req, res) => {
+router.get("/profileIcons", (req, res) => {
     getObject(params);
 });
-router.post('/champIcons', upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/champIcons", upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const files = req.files;
     if (!files)
         return;
@@ -36,16 +36,16 @@ router.post('/champIcons', upload.any(), (req, res) => __awaiter(void 0, void 0,
         const imagePath = files[i].path;
         const blob = (0, fs_1.readFileSync)(imagePath);
         const params = {
-            Bucket: 'opzz.back',
+            Bucket: "opzz.back",
             Key: `champIcon/${files[i].originalname}`,
             Body: blob,
         };
-        yield (0, iconService_1.uploadIcons)(params, 'champ');
+        yield (0, iconService_1.uploadIcons)(params, "champ");
     }
     res.status(200);
     // console.log(req.files)
 }));
-router.post('/itemIcons', upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/itemIcons", upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const files = req.files;
     if (!files)
         return;
@@ -54,16 +54,16 @@ router.post('/itemIcons', upload.any(), (req, res) => __awaiter(void 0, void 0, 
         const imagePath = files[i].path;
         const blob = (0, fs_1.readFileSync)(imagePath);
         const params = {
-            Bucket: 'opzz.back',
+            Bucket: "opzz.back",
             Key: `itemIcon/${files[i].originalname}`,
             Body: blob,
         };
-        yield (0, iconService_1.uploadIcons)(params, 'item');
+        yield (0, iconService_1.uploadIcons)(params, "item");
     }
     res.status(200);
     // console.log(req.files)
 }));
-router.post('/spellIcons', upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/spellIcons", upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const files = req.files;
     if (!files)
         return;
@@ -72,16 +72,16 @@ router.post('/spellIcons', upload.any(), (req, res) => __awaiter(void 0, void 0,
         const imagePath = files[i].path;
         const blob = (0, fs_1.readFileSync)(imagePath);
         const params = {
-            Bucket: 'opzz.back',
+            Bucket: "opzz.back",
             Key: `spellIcon/${files[i].originalname}`,
             Body: blob,
         };
-        yield (0, iconService_1.uploadIcons)(params, 'spell');
+        yield (0, iconService_1.uploadIcons)(params, "spell");
     }
     res.status(200);
     // console.log(req.files)
 }));
-router.get('/by-name/:summonerName', (req, res) => {
+router.get("/by-name/:summonerName", (req, res) => {
     console.log(req);
 });
 exports.default = router;

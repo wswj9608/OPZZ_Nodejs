@@ -9,9 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSummonerMatches = void 0;
+exports.getItemsToRiot = exports.getSummonerMatches = void 0;
 const common_1 = require("../common");
 const BASE_URL = "https://asia.api.riotgames.com/lol/match/v5/matches";
+const DDRAGON_URL = "http://ddragon.leagueoflegends.com/cdn/12.19.1/data/ko_KR";
 const getSummonerMatches = (puuid) => __awaiter(void 0, void 0, void 0, function* () {
     const { data: matchIds } = yield common_1.riotClient.get(`${BASE_URL}/by-puuid/${puuid}/ids?start=0&count=3
   `);
@@ -23,3 +24,29 @@ const getSummonerMatches = (puuid) => __awaiter(void 0, void 0, void 0, function
     return matchInfos;
 });
 exports.getSummonerMatches = getSummonerMatches;
+// export const getItemInfos = async (item: number) => {
+//   const { data } = await riotClient.get(`${DDRAGON_URL}/item.json`)
+//   // console.log("dddddd =======>", data.data[item]?.name)
+//   if (data.data[item]?.name) {
+//     const { name, description, gold } = data.data[item]
+//     const payload = {
+//       name,
+//       description,
+//       gold,
+//     }
+//     return payload
+//   }
+// }
+const getItemsToRiot = () => __awaiter(void 0, void 0, void 0, function* () {
+    const { data } = yield common_1.riotClient.get(`${DDRAGON_URL}/item.json`);
+    // console.log("dddddd =======>", data.data[item]?.name)
+    // if (data.data[item]?.name) {
+    //   const { name, description, gold } = data.data[item]
+    //   const payload = {
+    //     name,
+    //     description,
+    //     gold,
+    //   }
+    return data.data;
+});
+exports.getItemsToRiot = getItemsToRiot;

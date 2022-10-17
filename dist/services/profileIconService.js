@@ -11,7 +11,7 @@ const models_1 = require("../models");
 aws_sdk_1.default.config.update(s3_1.s3Config);
 const s3 = new aws_sdk_1.default.S3();
 exports.params = {
-    Bucket: 'opzz.back',
+    Bucket: "opzz.back",
     ContinuationToken: undefined,
 };
 let objects = [];
@@ -28,14 +28,16 @@ const getObject = (s3Params) => {
             objects === null || objects === void 0 ? void 0 : objects.forEach((el, i) => {
                 if (!el.Key)
                     return;
-                s3.getSignedUrl('getObject', { Bucket: 'opzz.back', Key: el.Key }, (err, data) => {
-                    var _a;
-                    const image_url = data.split('?')[0];
-                    console.log(objects.length);
-                    mysql_1.connection.query((0, models_1.insertIcons)('profile'), { image_url, file_name: (_a = el.Key) === null || _a === void 0 ? void 0 : _a.split('/')[1] }, (err, result) => {
-                        if (err)
-                            return;
-                        console.log(result);
+                s3.getSignedUrl("getObject", { Bucket: "opzz.back", Key: el.Key }, (err, data) => {
+                    const image_url = data.split("?")[0];
+                    (0, mysql_1.getConnection)((conn) => {
+                        var _a;
+                        conn.query((0, models_1.insertIcons)("profile"), { image_url, file_name: (_a = el.Key) === null || _a === void 0 ? void 0 : _a.split("/")[1] }, (err, result) => {
+                            if (err)
+                                return;
+                            console.log(result);
+                        });
+                        conn.release();
                     });
                 });
             });
@@ -45,14 +47,17 @@ const getObject = (s3Params) => {
 exports.getObject = getObject;
 const getProfileUrl = (fileName) => {
     return new Promise((resolve, reject) => {
-        mysql_1.connection.query(models_1.getProfileUrlQuery, fileName, (err, result) => {
-            var _a;
-            // console.log('result= =====>', result)
-            if (err) {
-                reject(err);
-            }
-            resolve(((_a = result[0]) === null || _a === void 0 ? void 0 : _a.image_url) ||
-                'https://s3.ap-northeast-2.amazonaws.com/opzz.back/profileicon/1.png');
+        (0, mysql_1.getConnection)((conn) => {
+            conn.query(models_1.getProfileUrlQuery, fileName, (err, result) => {
+                var _a;
+                // console.log('result= =====>', result)
+                if (err) {
+                    reject(err);
+                }
+                resolve(((_a = result[0]) === null || _a === void 0 ? void 0 : _a.image_url) ||
+                    "https://s3.ap-northeast-2.amazonaws.com/opzz.back/profileicon/1.png");
+            });
+            conn.release();
         });
     });
 };

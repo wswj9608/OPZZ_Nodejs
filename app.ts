@@ -3,6 +3,7 @@ import loader from "./loaders"
 
 import dotenv from "dotenv"
 import summonerRoutes from "./routes/summoner"
+import uploadRoutes from "./routes/upload"
 import loaders from "./loaders"
 import { Collection, Db, MongoClient } from "mongodb"
 import { envData } from "./config"
@@ -21,6 +22,7 @@ const startServer = async () => {
   // })
 
   app.use("/summoner", summonerRoutes)
+  app.use("/upload", uploadRoutes)
 
   app.listen(port, () => {
     console.log(`[server]: Server is running at <https://localhost>:${port}`)

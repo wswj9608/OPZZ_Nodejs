@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const summoner_1 = __importDefault(require("./routes/summoner"));
+const upload_1 = __importDefault(require("./routes/upload"));
 const loaders_1 = __importDefault(require("./loaders"));
 const config_1 = require("./config");
 const { port } = config_1.envData;
@@ -26,6 +27,7 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     //   getCollection(client)
     // })
     app.use("/summoner", summoner_1.default);
+    app.use("/upload", upload_1.default);
     app.listen(port, () => {
         console.log(`[server]: Server is running at <https://localhost>:${port}`);
     });

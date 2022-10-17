@@ -1,7 +1,20 @@
-import mysql from "mysql"
+import mysql, { MysqlError } from "mysql"
 import { dbConfig } from "../config/database"
 
-export const connection = mysql.createConnection(dbConfig)
+const connection = mysql.createConnection(dbConfig)
 
-connection.connect()
-console.log("mysql connect")
+const pool = mysql.createPool(dbConfig)
+
+export const getConnection = (
+  callback: (conn: mysql.PoolConnection) => void
+) => {
+  pool.getConnection((err, conn) => {
+    if (!err) {
+      callback(conn)
+    }
+  })
+}
+
+// connection.beginTransaction()
+
+// connection.commit()

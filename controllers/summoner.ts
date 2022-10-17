@@ -50,13 +50,23 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
 
             const { image_url } = await getChapmIcon(championName)
 
+            const items = [item0, item1, item2, item3, item4, item5, item6]
+            // const itemInfos = await Promise.all(
+            //   items.map(async (item, i) => {
+            //     if (i > 1) return
+            //     return await getItemInfos(item)
+            //   })
+            // )
+
+            // console.log("item ========>", itemInfos)
+
             const participantData = {
               kills,
               assists,
               deaths,
               champion: { image_url, championName },
               champLevel,
-              items: [item0, item1, item2, item3, item4, item5, item6],
+              items: items,
               visionWardsBoughtInGame,
               totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
               minionsPerMinute:
@@ -70,11 +80,6 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
             return participantData
           })
         )
-
-        // 여따가 db 가져오는거 넣어봐야지
-        // console.log(gameData)
-
-        console.log(info.gameDuration)
 
         const matchInfos = {
           gameEndTimestamp: timeForToday(new Date(info.gameEndTimestamp)),
