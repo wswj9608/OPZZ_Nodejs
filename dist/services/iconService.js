@@ -21,10 +21,10 @@ aws_sdk_1.default.config.update(s3_1.s3Config);
 const s3 = new aws_sdk_1.default.S3();
 const uploadIcons = (params, table) => __awaiter(void 0, void 0, void 0, function* () {
     const { Location } = yield s3.upload(params).promise();
-    if (table === "item") {
+    if (table === 'item') {
         (0, mysql_1.getConnection)((conn) => {
             conn.query((0, models_1.insertIcons)(table), {
-                item_id: Number(Location === null || Location === void 0 ? void 0 : Location.split(`${table}Icon/`)[1].split(".")[0]),
+                item_id: Number(Location === null || Location === void 0 ? void 0 : Location.split(`${table}Icon/`)[1].split('.')[0]),
                 image_url: Location,
                 file_name: Location === null || Location === void 0 ? void 0 : Location.split(`${table}Icon/`)[1],
             }, (err, result) => {
@@ -55,7 +55,6 @@ const getSummonerSpellIcons = (spellId1, spellId2) => {
             conn.query(`SELECT image_url,spell_id,file_name FROM spell_icon WHERE spell_id = ? || spell_id = ?`, [String(spellId1), String(spellId2)], (err, result) => {
                 if (err)
                     reject(err);
-                console.log("spellIcons db result ===========>", result);
                 resolve(result);
             });
             conn.release();
@@ -69,7 +68,6 @@ const getChapmIcon = (champName) => {
             conn.query(`SELECT image_url FROM champ_icon WHERE SUBSTRING_INDEX(file_name, '.', 1) = ?`, champName, (err, result) => {
                 if (err)
                     reject(err);
-                console.log("spellIcons db result ===========>", result);
                 resolve(result[0]);
             });
             conn.release();

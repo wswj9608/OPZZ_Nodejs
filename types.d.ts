@@ -97,3 +97,13 @@ interface MatchInfoType {
   }[]
   tournamentCode: string
 }
+
+interface ItemsType {
+  icon_id: number
+  item_id: number
+  image_url: string
+  file_name: string
+  name: string
+  description: string
+  gold_total: number
+}

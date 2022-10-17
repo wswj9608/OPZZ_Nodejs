@@ -1,9 +1,10 @@
-import { RequestHandler } from "express"
-import { getSummonerMatches } from "../lib/api/match"
-import { getSummonerPuuid } from "../lib/api/summoner"
-import { getChapmIcon, getSummonerSpellIcons } from "../services/iconService"
-import { getProfileUrl } from "../services/profileIconService"
-import { timeForToday } from "../utills"
+import { RequestHandler } from 'express'
+import { getSummonerMatches } from '../lib/api/match'
+import { getSummonerPuuid } from '../lib/api/summoner'
+import { getChapmIcon, getSummonerSpellIcons } from '../services/iconService'
+import { selectItemInfos } from '../services/itemInfoService'
+import { getProfileUrl } from '../services/profileIconService'
+import { timeForToday } from '../utills'
 
 export const getSummonerProfile: RequestHandler = async (req, res) => {
   try {
@@ -15,7 +16,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
 
     const profileIconImageUrl = await getProfileUrl(String(profileIconId))
 
-    const matchInfosData = await Promise.all(
+    const matchs = await Promise.all(
       riotMatchInfos.map(async (info) => {
         const gameData = await Promise.all(
           info.participants.map(async (participant) => {
@@ -38,7 +39,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
               item6,
               visionWardsBoughtInGame,
               neutralMinionsKilled,
-              totalMinionsKilled,
+              totalMinionsKilled: minionsKilled,
               summoner1Id,
               summoner2Id,
             } = participant
@@ -50,15 +51,24 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
 
             const { image_url } = await getChapmIcon(championName)
 
-            const items = [item0, item1, item2, item3, item4, item5, item6]
-            // const itemInfos = await Promise.all(
-            //   items.map(async (item, i) => {
-            //     if (i > 1) return
-            //     return await getItemInfos(item)
-            //   })
-            // )
+            const items = await selectItemInfos([
+              item0,
+              item1,
+              item2,
+              item3,
+              item4,
+              item5,
+              item6,
+            ])
 
-            // console.log("item ========>", itemInfos)
+            const totalMinionsKilled = minionsKilled + neutralMinionsKilled
+            const gameDurationMinute = new Date(
+              info.gameDuration * 1000
+            ).getMinutes()
+
+            const minionsPerMinute = Number(
+              (totalMinionsKilled / gameDurationMinute).toFixed(1)
+            )
 
             const participantData = {
               kills,
@@ -66,11 +76,10 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
               deaths,
               champion: { image_url, championName },
               champLevel,
-              items: items,
+              items,
               visionWardsBoughtInGame,
-              totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
-              minionsPerMinute:
-                (totalMinionsKilled + neutralMinionsKilled) / 60,
+              totalMinionsKilled,
+              minionsPerMinute,
               summonerSpells: [
                 summonerSpells.find((el) => el.spell_id === summoner1Id),
                 summonerSpells.find((el) => el.spell_id === summoner2Id),
@@ -99,7 +108,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
       puuid,
       summonerLevel,
       imageUrl: profileIconImageUrl || null,
-      matchInfosData,
+      matchs,
     }
 
     res.json(resData)

@@ -13,6 +13,7 @@ exports.getSummonerProfile = void 0;
 const match_1 = require("../lib/api/match");
 const summoner_1 = require("../lib/api/summoner");
 const iconService_1 = require("../services/iconService");
+const itemInfoService_1 = require("../services/itemInfoService");
 const profileIconService_1 = require("../services/profileIconService");
 const utills_1 = require("../utills");
 const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -21,29 +22,33 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(summonerName);
         const riotMatchInfos = yield (0, match_1.getSummonerMatches)(puuid);
         const profileIconImageUrl = yield (0, profileIconService_1.getProfileUrl)(String(profileIconId));
-        const matchInfosData = yield Promise.all(riotMatchInfos.map((info) => __awaiter(void 0, void 0, void 0, function* () {
+        const matchs = yield Promise.all(riotMatchInfos.map((info) => __awaiter(void 0, void 0, void 0, function* () {
             const gameData = yield Promise.all(info.participants.map((participant) => __awaiter(void 0, void 0, void 0, function* () {
-                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, visionWardsBoughtInGame, neutralMinionsKilled, totalMinionsKilled, summoner1Id, summoner2Id, } = participant;
+                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, visionWardsBoughtInGame, neutralMinionsKilled, totalMinionsKilled: minionsKilled, summoner1Id, summoner2Id, } = participant;
                 const summonerSpells = yield (0, iconService_1.getSummonerSpellIcons)(summoner1Id, summoner2Id);
                 const { image_url } = yield (0, iconService_1.getChapmIcon)(championName);
-                const items = [item0, item1, item2, item3, item4, item5, item6];
-                // const itemInfos = await Promise.all(
-                //   items.map(async (item, i) => {
-                //     if (i > 1) return
-                //     return await getItemInfos(item)
-                //   })
-                // )
-                // console.log("item ========>", itemInfos)
+                const items = yield (0, itemInfoService_1.selectItemInfos)([
+                    item0,
+                    item1,
+                    item2,
+                    item3,
+                    item4,
+                    item5,
+                    item6,
+                ]);
+                const totalMinionsKilled = minionsKilled + neutralMinionsKilled;
+                const gameDurationMinute = new Date(info.gameDuration * 1000).getMinutes();
+                const minionsPerMinute = Number((totalMinionsKilled / gameDurationMinute).toFixed(1));
                 const participantData = {
                     kills,
                     assists,
                     deaths,
                     champion: { image_url, championName },
                     champLevel,
-                    items: items,
+                    items,
                     visionWardsBoughtInGame,
-                    totalMinionsKilled: totalMinionsKilled + neutralMinionsKilled,
-                    minionsPerMinute: (totalMinionsKilled + neutralMinionsKilled) / 60,
+                    totalMinionsKilled,
+                    minionsPerMinute,
                     summonerSpells: [
                         summonerSpells.find((el) => el.spell_id === summoner1Id),
                         summonerSpells.find((el) => el.spell_id === summoner2Id),
@@ -66,7 +71,7 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
             puuid,
             summonerLevel,
             imageUrl: profileIconImageUrl || null,
-            matchInfosData,
+            matchs,
         };
         res.json(resData);
     }

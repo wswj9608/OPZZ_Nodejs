@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectItems = exports.insertItems = exports.insertIcons = exports.insertProfileIcons = exports.getProfileUrlQuery = void 0;
 exports.getProfileUrlQuery = "SELECT image_url FROM profile_icon WHERE SUBSTRING_INDEX(file_name, '.', 1) = ?";
-exports.insertProfileIcons = "INSERT INTO profile_icon SET ?";
+exports.insertProfileIcons = 'INSERT INTO profile_icon SET ?';
 const insertIcons = (table) => `INSERT INTO ${table}_icon SET ?`;
 exports.insertIcons = insertIcons;
-exports.insertItems = "INSERT INTO item_info (item_id, name, description, gold_total) VALUES ?";
-exports.selectItems = "SELECT distinct(icon_id), item_icon.item_id, image_url, file_name, name, description, gold_total FROM item_icon join item_info on item_icon.item_id = item_info.item_id WHERE item_icon.item_id = 1004;";
+exports.insertItems = 'INSERT INTO item_info (item_id, name, description, gold_total) VALUES ?';
+exports.selectItems = 'SELECT distinct(icon_id), item_icon.item_id, image_url, file_name, name, description, gold_total FROM item_icon join item_info on item_icon.item_id = item_info.item_id WHERE item_icon.item_id IN ?';
