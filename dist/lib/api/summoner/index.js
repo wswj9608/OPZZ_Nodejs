@@ -14,7 +14,6 @@ const common_1 = require("../common");
 const BASE_URL = "/lol/summoner/v4/summoners";
 const getSummonerPuuid = (summonerName) => __awaiter(void 0, void 0, void 0, function* () {
     const res = yield common_1.riotClient.get(`${BASE_URL}/by-name/${summonerName}`);
-    console.log(`${BASE_URL}/by-name/${summonerName}`);
     return res.data;
 });
 exports.getSummonerPuuid = getSummonerPuuid;

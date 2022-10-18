@@ -33,11 +33,16 @@ export const selectItemInfos = (items: number[]): Promise<ItemsType[]> => {
     getConnection((conn) => {
       conn.query(selectItems, [[items]], async (err, result) => {
         if (err) {
-          console.log("err ====> ", err)
           reject(conn.rollback())
         }
 
         const payload = await resultPushNull(result)
+        const accessaryIdx = payload.findIndex(
+          (el) =>
+            el.item_id === 3340 || el.item_id === 3363 || el.item_id === 3364
+        )
+        const accessary = payload.splice(accessaryIdx, 1)[0]
+        payload.push(accessary)
 
         resolve(payload)
       })

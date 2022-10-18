@@ -50,7 +50,6 @@ router.post("/itemIcons", upload.any(), (req, res) => __awaiter(void 0, void 0, 
     if (!files)
         return;
     for (let i = 0; i < files.length; i++) {
-        console.log(files[i]);
         const imagePath = files[i].path;
         const blob = (0, fs_1.readFileSync)(imagePath);
         const params = {
@@ -68,7 +67,6 @@ router.post("/spellIcons", upload.any(), (req, res) => __awaiter(void 0, void 0,
     if (!files)
         return;
     for (let i = 0; i < files.length; i++) {
-        console.log(files[i]);
         const imagePath = files[i].path;
         const blob = (0, fs_1.readFileSync)(imagePath);
         const params = {
@@ -81,7 +79,4 @@ router.post("/spellIcons", upload.any(), (req, res) => __awaiter(void 0, void 0,
     res.status(200);
     // console.log(req.files)
 }));
-router.get("/by-name/:summonerName", (req, res) => {
-    console.log(req);
-});
 exports.default = router;

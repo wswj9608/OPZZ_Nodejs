@@ -21,16 +21,15 @@ aws_sdk_1.default.config.update(s3_1.s3Config);
 const s3 = new aws_sdk_1.default.S3();
 const uploadIcons = (params, table) => __awaiter(void 0, void 0, void 0, function* () {
     const { Location } = yield s3.upload(params).promise();
-    if (table === 'item') {
+    if (table === "item") {
         (0, mysql_1.getConnection)((conn) => {
             conn.query((0, models_1.insertIcons)(table), {
-                item_id: Number(Location === null || Location === void 0 ? void 0 : Location.split(`${table}Icon/`)[1].split('.')[0]),
+                item_id: Number(Location === null || Location === void 0 ? void 0 : Location.split(`${table}Icon/`)[1].split(".")[0]),
                 image_url: Location,
                 file_name: Location === null || Location === void 0 ? void 0 : Location.split(`${table}Icon/`)[1],
             }, (err, result) => {
                 if (err)
                     return;
-                console.log(result);
             });
             conn.release();
         });
@@ -43,7 +42,6 @@ const uploadIcons = (params, table) => __awaiter(void 0, void 0, void 0, functio
         }, (err, result) => {
             if (err)
                 return;
-            console.log(result);
         });
         conn.release();
     });

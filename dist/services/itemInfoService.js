@@ -40,10 +40,12 @@ const selectItemInfos = (items) => {
         (0, mysql_1.getConnection)((conn) => {
             conn.query(models_1.selectItems, [[items]], (err, result) => __awaiter(void 0, void 0, void 0, function* () {
                 if (err) {
-                    console.log("err ====> ", err);
                     reject(conn.rollback());
                 }
                 const payload = yield resultPushNull(result);
+                const accessaryIdx = payload.findIndex((el) => el.item_id === 3340 || el.item_id === 3363 || el.item_id === 3364);
+                const accessary = payload.splice(accessaryIdx, 1)[0];
+                payload.push(accessary);
                 resolve(payload);
             }));
             conn.release();

@@ -49,7 +49,6 @@ router.post("/itemIcons", upload.any(), async (req, res) => {
   if (!files) return
 
   for (let i = 0; i < files.length; i++) {
-    console.log(files[i])
     const imagePath = files[i].path
     const blob = readFileSync(imagePath)
     const params = {
@@ -70,7 +69,6 @@ router.post("/spellIcons", upload.any(), async (req, res) => {
   if (!files) return
 
   for (let i = 0; i < files.length; i++) {
-    console.log(files[i])
     const imagePath = files[i].path
     const blob = readFileSync(imagePath)
     const params = {
@@ -83,10 +81,6 @@ router.post("/spellIcons", upload.any(), async (req, res) => {
   }
   res.status(200)
   // console.log(req.files)
-})
-
-router.get("/by-name/:summonerName", (req, res) => {
-  console.log(req)
 })
 
 export default router
