@@ -1,8 +1,9 @@
 import { RequestHandler } from "express"
-import { getItemsToRiot } from "../lib/api/match"
+import { getItemsToRiot, getPerksToRiot } from "../lib/api/match"
 import { insertItemInfos } from "../services/itemInfoService"
+import { insertPerkInfos } from "../services/perkInfoService"
 
-export const getItemInfos: RequestHandler = async (req, res) => {
+export const getItemInfosSaveToDb: RequestHandler = async (req, res) => {
   const itemObject = await getItemsToRiot()
   const items = Object.keys(itemObject).map((itemId: string, index) => {
     const itemInfo = Object.values(itemObject)[index] as any
@@ -17,4 +18,15 @@ export const getItemInfos: RequestHandler = async (req, res) => {
   } catch (err) {
     console.error(err)
   }
+}
+
+export const getPerkInfosSaveToDb: RequestHandler = async (req, res) => {
+  const perkRes = await getPerksToRiot()
+  const perks = perkRes.map((perk) => {
+    const { id, name, longDesc, iconPath } = perk
+    return [id, name, longDesc, iconPath]
+  })
+
+  await insertPerkInfos(perks)
+  res.status(200)
 }

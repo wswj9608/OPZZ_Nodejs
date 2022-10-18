@@ -1,8 +1,13 @@
 import { Router } from "express"
-import { getItemInfos } from "../controllers/upload"
+import {
+  getItemInfosSaveToDb,
+  getPerkInfosSaveToDb,
+} from "../controllers/upload"
 
 const router = Router()
 
-router.get("/itemInfos", getItemInfos)
+router.get("/itemInfos", getItemInfosSaveToDb)
+
+router.get("/perkInfos", getPerkInfosSaveToDb)
 
 export default router

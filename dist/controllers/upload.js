@@ -9,10 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getItemInfos = void 0;
+exports.getPerkInfosSaveToDb = exports.getItemInfosSaveToDb = void 0;
 const match_1 = require("../lib/api/match");
 const itemInfoService_1 = require("../services/itemInfoService");
-const getItemInfos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const perkInfoService_1 = require("../services/perkInfoService");
+const getItemInfosSaveToDb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const itemObject = yield (0, match_1.getItemsToRiot)();
     const items = Object.keys(itemObject).map((itemId, index) => {
         const itemInfo = Object.values(itemObject)[index];
@@ -28,4 +29,14 @@ const getItemInfos = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         console.error(err);
     }
 });
-exports.getItemInfos = getItemInfos;
+exports.getItemInfosSaveToDb = getItemInfosSaveToDb;
+const getPerkInfosSaveToDb = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const perkRes = yield (0, match_1.getPerksToRiot)();
+    const perks = perkRes.map((perk) => {
+        const { id, name, longDesc, iconPath } = perk;
+        return [id, name, longDesc, iconPath];
+    });
+    yield (0, perkInfoService_1.insertPerkInfos)(perks);
+    res.status(200);
+});
+exports.getPerkInfosSaveToDb = getPerkInfosSaveToDb;

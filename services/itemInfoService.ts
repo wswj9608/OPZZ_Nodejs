@@ -1,6 +1,6 @@
-import { riotClient } from '../lib/api/common'
-import { getConnection } from '../loaders/mysql'
-import { insertItems, selectItems } from '../models'
+import { riotClient } from "../lib/api/common"
+import { getConnection } from "../loaders/mysql"
+import { insertItems, selectItems } from "../models"
 
 export const insertItemInfos = (items: any[]) => {
   return new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ export const selectItemInfos = (items: number[]): Promise<ItemsType[]> => {
     getConnection((conn) => {
       conn.query(selectItems, [[items]], async (err, result) => {
         if (err) {
-          console.log('err ====> ', err)
+          console.log("err ====> ", err)
           reject(conn.rollback())
         }
 

@@ -40,7 +40,7 @@ const selectItemInfos = (items) => {
         (0, mysql_1.getConnection)((conn) => {
             conn.query(models_1.selectItems, [[items]], (err, result) => __awaiter(void 0, void 0, void 0, function* () {
                 if (err) {
-                    console.log('err ====> ', err);
+                    console.log("err ====> ", err);
                     reject(conn.rollback());
                 }
                 const payload = yield resultPushNull(result);

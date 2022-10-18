@@ -28,6 +28,8 @@
     <button class="btn btn-danger" id="spell-icon-save-button">Save</button>
     <p>item 정보 DB 업로드</p>
     <button class="btn btn-danger" id="item-info-save-button">Save</button>
+    <p>룬 정보 DB 업로드</p>
+    <button class="btn btn-danger" id="perk-info-save-button">Save</button>
     <script>
       $("#icon-save-button").click(function (e) {
         $.ajax({
@@ -85,6 +87,13 @@
         $.ajax({
           method: "GET",
           url: "/upload/itemInfos",
+        })
+      })
+
+      $("#perk-info-save-button").click(async function (e) {
+        $.ajax({
+          method: "GET",
+          url: "/upload/perkInfos",
         })
       })
     </script>

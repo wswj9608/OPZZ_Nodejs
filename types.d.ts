@@ -43,6 +43,23 @@ interface MatchInfoType {
     kills: number
     participantId: number
     pentaKills: number
+    perks: {
+      statPerks: {
+        defense: number
+        flex: number
+        offense: number
+      }
+      styles: {
+        description: string
+        selections: {
+          perk: number
+          var1: number
+          var2: number
+          var3: number
+        }[]
+        style: number
+      }[]
+    }
     profileIcon: number
     puuid: string
     quadraKills: number
@@ -106,4 +123,23 @@ interface ItemsType {
   name: string
   description: string
   gold_total: number
+}
+
+interface PerkType {
+  id: number
+  name: string
+  majorChangePatchVersion: string
+  tooltip: string
+  shortDesc: string
+  longDesc: string
+  iconPath: string
+  endOfGameStatDescs: string[]
+}
+
+interface SelectPerkType {
+  id: number
+  perk_id: number
+  name: string
+  long_desc: string
+  icon_path: string
 }
