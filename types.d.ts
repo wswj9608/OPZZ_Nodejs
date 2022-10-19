@@ -14,6 +14,41 @@ interface SummonerInfoType {
   summonerLevel: number
 }
 
+interface TeamType {
+  bans: {
+    championId: number
+    pickTurn: number
+  }[]
+  objectives: {
+    baron: {
+      first: boolean
+      kills: number
+    }
+    champion: {
+      first: boolean
+      kills: number
+    }
+    dragon: {
+      first: boolean
+      kills: number
+    }
+    inhibitor: {
+      first: boolean
+      kills: number
+    }
+    riftHerald: {
+      first: boolean
+      kills: number
+    }
+    tower: {
+      first: boolean
+      kills: number
+    }
+  }
+  teamId: number
+  win: boolean
+}
+
 interface MatchInfoType {
   gameCreation: number
   gameDuration: number
@@ -78,40 +113,7 @@ interface MatchInfoType {
     wardsPlaced: number
     win: boolean
   }[]
-  teams: {
-    bans: {
-      championId: number
-      pickTurn: number
-    }[]
-    objectives: {
-      baron: {
-        first: boolean
-        kills: number
-      }
-      champion: {
-        first: boolean
-        kills: number
-      }
-      dragon: {
-        first: boolean
-        kills: number
-      }
-      inhibitor: {
-        first: boolean
-        kills: number
-      }
-      riftHerald: {
-        first: boolean
-        kills: number
-      }
-      tower: {
-        first: boolean
-        kills: number
-      }
-    }
-    teamId: number
-    win: boolean
-  }[]
+  teams: TeamType[]
   tournamentCode: string
 }
 

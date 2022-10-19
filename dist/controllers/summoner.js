@@ -27,7 +27,7 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
             let primaryPerks = [];
             const gameDatas = yield Promise.all(info.participants.map((participant) => __awaiter(void 0, void 0, void 0, function* () {
                 var _a, _b;
-                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, item0, item1, item2, item3, item4, item5, item6, perks, visionWardsBoughtInGame, neutralMinionsKilled, summonerName, totalMinionsKilled: minionsKilled, summoner1Id, summoner2Id, } = participant;
+                const { kills, assists, deaths, doubleKills, tripleKills, quadraKills, pentaKills, championName, champLevel, teamId, item0, item1, item2, item3, item4, item5, item6, perks, visionWardsBoughtInGame, neutralMinionsKilled, summonerName, win, totalMinionsKilled: minionsKilled, summoner1Id, summoner2Id, } = participant;
                 const summonerSpells = yield (0, iconService_1.getSummonerSpellIcons)(summoner1Id, summoner2Id);
                 const { image_url } = yield (0, iconService_1.getChapmIcon)(championName);
                 const items = yield (0, itemInfoService_1.selectItemInfos)([
@@ -54,9 +54,29 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 const gameDurationMinute = new Date(info.gameDuration * 1000).getMinutes();
                 const minionsPerMinute = Number((totalMinionsKilled / gameDurationMinute).toFixed(1));
                 const kda = Number(((kills + assists) / deaths).toFixed(2));
+                const myTeam = info.teams.find((team) => team.teamId === teamId);
+                const killParticipationRate = Number((((kills + assists) /
+                    myTeam.objectives.champion.kills) * 100).toFixed(0));
                 // const primaryPerk = await selectPerkInfos(primaryPerkId)
                 // console.log("primary ========>", primaryPerk)
                 // console.log(primaryPerk.id)
+                const mostMultiKills = () => {
+                    if (pentaKills) {
+                        return "펜타킬";
+                    }
+                    else if (quadraKills) {
+                        return "쿼드라킬";
+                    }
+                    else if (tripleKills) {
+                        return "트리플킬";
+                    }
+                    else if (doubleKills) {
+                        return "더블킬";
+                    }
+                    else {
+                        return null;
+                    }
+                };
                 const participantData = {
                     summonerName,
                     kills,
@@ -66,10 +86,16 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     champion: { image_url, championName },
                     champLevel,
                     items,
-                    visionWardsBoughtInGame,
-                    totalMinionsKilled,
-                    minionsPerMinute,
+                    teamId,
+                    win,
+                    status: {
+                        killParticipationRate,
+                        visionWardsBoughtInGame,
+                        totalMinionsKilled,
+                        minionsPerMinute,
+                    },
                     primaryPerkId,
+                    mostMultiKills: mostMultiKills(),
                     subPerkStyleId,
                     summonerSpells: [
                         summonerSpells.find((el) => el.spell_id === summoner1Id),
@@ -87,6 +113,7 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     .slice(14, 19),
                 gameDatas,
                 primaryPerks: primaryPerksInfo,
+                teams: info.teams,
             };
             return matchInfos;
         })));

@@ -37,6 +37,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
               pentaKills,
               championName,
               champLevel,
+              teamId,
               item0,
               item1,
               item2,
@@ -48,6 +49,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
               visionWardsBoughtInGame,
               neutralMinionsKilled,
               summonerName,
+              win,
               totalMinionsKilled: minionsKilled,
               summoner1Id,
               summoner2Id,
@@ -99,9 +101,34 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
 
             const kda = Number(((kills + assists) / deaths).toFixed(2))
 
+            const myTeam = info.teams.find(
+              (team) => team.teamId === teamId
+            ) as TeamType
+
+            const killParticipationRate = Number(
+              (
+                (((kills + assists) /
+                  myTeam.objectives.champion.kills) as number) * 100
+              ).toFixed(0)
+            )
+
             // const primaryPerk = await selectPerkInfos(primaryPerkId)
             // console.log("primary ========>", primaryPerk)
             // console.log(primaryPerk.id)
+
+            const mostMultiKills = () => {
+              if (pentaKills) {
+                return "펜타킬"
+              } else if (quadraKills) {
+                return "쿼드라킬"
+              } else if (tripleKills) {
+                return "트리플킬"
+              } else if (doubleKills) {
+                return "더블킬"
+              } else {
+                return null
+              }
+            }
 
             const participantData = {
               summonerName,
@@ -112,10 +139,16 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
               champion: { image_url, championName },
               champLevel,
               items,
-              visionWardsBoughtInGame,
-              totalMinionsKilled,
-              minionsPerMinute,
+              teamId,
+              win,
+              status: {
+                killParticipationRate,
+                visionWardsBoughtInGame,
+                totalMinionsKilled,
+                minionsPerMinute,
+              },
               primaryPerkId,
+              mostMultiKills: mostMultiKills(),
               subPerkStyleId,
               summonerSpells: [
                 summonerSpells.find((el) => el.spell_id === summoner1Id),
@@ -137,6 +170,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
             .slice(14, 19),
           gameDatas,
           primaryPerks: primaryPerksInfo,
+          teams: info.teams,
         }
 
         return matchInfos
