@@ -145,3 +145,20 @@ interface SelectPerkType {
   long_desc: string
   icon_path: string
 }
+
+// league api
+interface LeagueInfo {
+  leagueId: string
+  queueType: "RANKED_SOLO_5x5" | "RANKED_FLEX_SR"
+  tier: string
+  rank: string
+  summonerId: string
+  summonerName: string
+  leaguePoints: number
+  wins: number
+  losses: number
+  veteran: boolean
+  inactive: boolean
+  freshBlood: boolean
+  hotStreak: boolean
+}

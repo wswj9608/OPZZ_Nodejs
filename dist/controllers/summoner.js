@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSummonerProfile = void 0;
+const league_1 = require("../lib/api/league");
 const match_1 = require("../lib/api/match");
 const summoner_1 = require("../lib/api/summoner");
 const iconService_1 = require("../services/iconService");
@@ -22,6 +23,7 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const searchSummonerName = encodeURI(req.query.summonerName);
         const { name, id, puuid, summonerLevel, profileIconId } = yield (0, summoner_1.getSummonerPuuid)(searchSummonerName);
         const riotMatchInfos = yield (0, match_1.getSummonerMatches)(puuid);
+        const riotLeagueInfo = yield (0, league_1.getLeagueToRiot)(id);
         const profileIconImageUrl = yield (0, profileIconService_1.getProfileUrl)(String(profileIconId));
         const matchs = yield Promise.all(riotMatchInfos.map((info) => __awaiter(void 0, void 0, void 0, function* () {
             let primaryPerks = [];
@@ -122,6 +124,7 @@ const getSummonerProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
             id,
             puuid,
             summonerLevel,
+            riotLeagueInfo,
             imageUrl: profileIconImageUrl || null,
             matchs,
         };

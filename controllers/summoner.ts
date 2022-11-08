@@ -1,4 +1,5 @@
 import { RequestHandler } from "express"
+import { getLeagueToRiot } from "../lib/api/league"
 import { getSummonerMatches } from "../lib/api/match"
 import { getSummonerPuuid } from "../lib/api/summoner"
 import { getChapmIcon, getSummonerSpellIcons } from "../services/iconService"
@@ -14,6 +15,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
     const { name, id, puuid, summonerLevel, profileIconId }: SummonerInfoType =
       await getSummonerPuuid(searchSummonerName)
     const riotMatchInfos = await getSummonerMatches(puuid)
+    const riotLeagueInfo = await getLeagueToRiot(id)
 
     const profileIconImageUrl = await getProfileUrl(String(profileIconId))
 
@@ -182,6 +184,7 @@ export const getSummonerProfile: RequestHandler = async (req, res) => {
       id,
       puuid,
       summonerLevel,
+      riotLeagueInfo,
       imageUrl: profileIconImageUrl || null,
       matchs,
     }
