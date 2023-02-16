@@ -5,8 +5,5 @@ import { Request, Response } from "express";
  * @route GET /
  */
 export const index = (req: Request, res: Response) => {
-    console.log(req);
-    res.json({
-        title: "Home"
-    });
+    res.render("index.ejs");
 };

@@ -12,6 +12,7 @@ import mysql from "mysql";
 import * as homeController from "./controllers/home";
 import * as apiController from "./controllers/api";
 import * as summonerController from "./controllers/summoner";
+import * as dbUpdateController from "./controllers/dbUpdate";
 import { dbConfig } from "./config/database";
 
 // API keys and Passport configuration
@@ -41,6 +42,7 @@ app.use(
  */
 app.get("/", homeController.index);
 app.get("/summoner/:summonerName", summonerController.getSummoner);
+app.get("/update/items", dbUpdateController.updateItems);
 // app.get("/login", userController.getLogin);
 // app.post("/login", userController.postLogin);
 // app.get("/logout", userController.logout);
