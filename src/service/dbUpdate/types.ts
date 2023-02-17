@@ -1,4 +1,4 @@
-export interface Item {
+export interface RiotResponseItem {
   id:number,
   name:string,
   description: string,

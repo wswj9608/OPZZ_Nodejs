@@ -1,10 +1,10 @@
 import communityDragonClient from "../riot/communityDragonClient";
 import { getConnection } from "../../util/mysql";
-import { Item } from "./types";
+import {  RiotResponseItem } from "./types";
 import * as query from "../../models/query";
 
 export const insertItems = async () :Promise<void> => {
-  const items = (await communityDragonClient.get<Item[]>("/items.json")).data
+  const items = (await communityDragonClient.get<RiotResponseItem[]>("/items.json")).data
     .map((item) => ([item.id, item.name, item.description, item.priceTotal]));
   
   getConnection((conn) => {

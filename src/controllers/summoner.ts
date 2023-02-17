@@ -7,6 +7,7 @@ export const getSummoner = async (req: Request, res: Response) : Promise<void> =
   const summonerName = req.params.summonerName;
 
   const data = await riotService.getSummonerProfile(summonerName);
-  console.log(data);
-  res.json(data);
+
+  const data2 = await riotService.getMatches(data.id);
+  res.json(data2);
 };
