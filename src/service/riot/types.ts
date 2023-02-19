@@ -9,10 +9,10 @@ export interface SummonerInfo {
 }
 
 export interface SummonerProfile {
-  id : string
+  id: string
   name: string
   summonerLevel: number
-  summonerIconImageUrl:string
+  summonerIconImageUrl: string
 }
 
 export interface Team {
@@ -50,9 +50,8 @@ export interface Team {
   win: boolean
 }
 
-
 export interface Match {
-  info :{
+  info: {
     gameCreation: number
     gameDuration: number
     gameEndTimestamp: number
@@ -117,14 +116,14 @@ export interface Match {
       win: boolean
     }[]
   }
- 
+
   teams: Team[]
   tournamentCode: string
 }
 
 export interface Item {
-  item_id: number,
-  name: string,
-  description: string,
-  total_gold : number
+  item_id: number
+  name: string
+  description: string
+  total_gold: number
 }

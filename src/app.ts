@@ -1,48 +1,44 @@
-import express from "express";
-import compression from "compression";  // compresses requests
-import session from "express-session";
-import bodyParser from "body-parser";
-import path from "path";
-import bluebird from "bluebird";
-import dotenv from "dotenv";
-import mysql from "mysql";
-
+import express from 'express'
+import compression from 'compression' // compresses requests
+import session from 'express-session'
+import bodyParser from 'body-parser'
+import path from 'path'
+import bluebird from 'bluebird'
+import dotenv from 'dotenv'
+import mysql from 'mysql'
 
 // Controllers (route handlers)
-import * as homeController from "./controllers/home";
-import * as apiController from "./controllers/api";
-import * as summonerController from "./controllers/summoner";
-import * as dbUpdateController from "./controllers/dbUpdate";
-import { dbConfig } from "./config/database";
+import * as homeController from './controllers/home'
+import * as apiController from './controllers/api'
+import * as summonerController from './controllers/summoner'
+import * as dbUpdateController from './controllers/dbUpdate'
+import { dbConfig } from './config/database'
 
 // API keys and Passport configuration
 
 // Create Express server
-const app = express();
+const app = express()
 
 // Connect to Mysql
-mysql.createConnection(dbConfig);
+mysql.createConnection(dbConfig)
 
 // Express configuration
-dotenv.config();
+dotenv.config()
 
-app.set("port", process.env.EXPRESS_PORT);
-app.set("view engine", "pug");
-app.use(compression());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.set('port', process.env.EXPRESS_PORT)
+app.set('view engine', 'pug')
+app.use(compression())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
-
-app.use(
-    express.static(path.join(__dirname, "public"), { maxAge: 31557600000 })
-);
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
 
 /**
  * Primary app routes.
  */
-app.get("/", homeController.index);
-app.get("/summoner/:summonerName", summonerController.getSummoner);
-app.get("/update/items", dbUpdateController.updateItems);
+app.get('/', homeController.index)
+app.get('/summoner/:summonerName', summonerController.getSummoner)
+app.get('/update/items', dbUpdateController.updateItems)
 // app.get("/login", userController.getLogin);
 // app.post("/login", userController.postLogin);
 // app.get("/logout", userController.logout);
@@ -63,10 +59,10 @@ app.get("/update/items", dbUpdateController.updateItems);
 /**
  * API examples routes.
  */
-app.get("/api", apiController.getApi);
+app.get('/api', apiController.getApi)
 
 /**
  * OAuth authentication routes. (Sign in)
  */
 
-export default app;
+export default app
