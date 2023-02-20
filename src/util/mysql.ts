@@ -1,5 +1,5 @@
 import mysql from 'mysql'
-import { dbConfig } from '@/config/database'
+import { dbConfig } from '../config/database'
 
 const pool = mysql.createPool(dbConfig)
 

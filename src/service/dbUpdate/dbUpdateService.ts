@@ -1,7 +1,7 @@
-import communityDragonClient from '@/service/riot/communityDragonClient'
-import { getConnection } from '@/util/mysql'
+import communityDragonClient from '../../service/riot/communityDragonClient'
+import { getConnection } from '../../util/mysql'
 import { RiotResponseItem } from './types'
-import * as query from '@/models/query'
+import * as query from '../../models/query'
 
 export const insertItems = async (): Promise<void> => {
   const items = (await communityDragonClient.get<RiotResponseItem[]>('/items.json')).data.map(item => [

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import * as dbUpdateService from '@/service/dbUpdate/dbUpdateService'
+import * as dbUpdateService from '../service/dbUpdate/dbUpdateService'
 
 export const updateItems = async (req: Request, res: Response) => {
   await dbUpdateService.insertItems()
