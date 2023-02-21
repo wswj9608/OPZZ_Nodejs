@@ -45,13 +45,12 @@ const getItems = async (itemIds: number[]): Promise<Item[]> => {
   })
 }
 
-export const getSummonerSpellIcons = (
-  spellId1: number,
-  spellId2: number
+const getSummonerSpellIcons = (
+  spellIds: number[]
 ): Promise<{ image_url: string; spell_id: number; file_name: string }[]> => {
   return new Promise((resolve, reject) => {
     getConnection(conn => {
-      conn.query(query.selectSpells, [String(spellId1), String(spellId2)], (err, result) => {
+      conn.query(query.selectSpells, [[spellIds]], (err, result) => {
         if (err) reject(err)
         resolve(result)
       })
@@ -85,10 +84,7 @@ export const getMatches = async (puuid: string, searchName: string): Promise<any
         const uniqeSpellIds = [...new Set(allMatchSpellIds)]
 
         const allMatchItems = await getItems(uniqeItemIds)
-        // const spells = await
-
-        console.log(uniqeItemIds)
-        console.log(allMatchItems)
+        const allMatchSpells = await getSummonerSpellIcons(uniqeSpellIds)
 
         const gameDurationMinute = new Date(gameDuration * 1000).getMinutes()
         const searchSummonerTeamId = participants.find(el => el.summonerName === searchName).teamId
@@ -99,22 +95,15 @@ export const getMatches = async (puuid: string, searchName: string): Promise<any
             const { item0, item1, item2, item3, item4, item5, item6, perks, summoner1Id, summoner2Id } = participant
             const { kda, killParticipation } = participant.challenges
 
-            // const itemIds = [item0, item1, item2, item3, item4, item5, item6]
-            const items = allMatchItems.find(
-              el =>
-                el.item_id === item0 ||
-                el.item_id === item1 ||
-                el.item_id === item2 ||
-                el.item_id === item3 ||
-                el.item_id === item4 ||
-                el.item_id === item5 ||
-                el.item_id === item6
-            )
+            const itemIds = [item0, item1, item2, item3, item4, item5, item6]
+            const items = itemIds.map(itemId => allMatchItems.find(item => item.item_id === itemId))
+
+            const spellIds = [summoner1Id, summoner2Id]
+            const spells = spellIds.map(spellId => allMatchSpells.find(spell => spell.spell_id === spellId))
+
             const minionsPerMinute = Number((participant.totalMinionsKilled / gameDurationMinute).toFixed(1))
             const primaryPerkId = perks.styles.find(style => style.description === 'primaryStyle')?.selections[0].perk
             const subPerkStyleId = perks.styles.find(style => style.description === 'subStyle')?.style
-            const summonerSpells = await getSummonerSpellIcons(summoner1Id, summoner2Id)
-            // const summonerSpell1 = summonerSpells.find(spell => spell.spell_id === participant.summoner1Id)
 
             const data = {
               summonerName: participant.summonerName,
@@ -140,7 +129,7 @@ export const getMatches = async (puuid: string, searchName: string): Promise<any
               minionsPerMinute,
               primaryPerkId,
               subPerkStyleId,
-              // summonerSpell1,
+              summonerSpells: spells,
             }
 
             return data
