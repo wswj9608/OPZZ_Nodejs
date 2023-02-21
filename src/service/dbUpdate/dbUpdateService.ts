@@ -7,6 +7,7 @@ export const insertItems = async (): Promise<void> => {
   const items = (await communityDragonClient.get<RiotResponseItem[]>('/items.json')).data.map(item => [
     item.id,
     item.name,
+    item.iconPath.split('Icons2D/')[1],
     item.description,
     item.priceTotal,
   ])
@@ -14,8 +15,10 @@ export const insertItems = async (): Promise<void> => {
   getConnection(conn => {
     conn.query(query.insertItems, [items], (err, result) => {
       if (err) {
+        console.log('err', err)
         conn.rollback()
       }
+      console.log(result)
       return 'update 완료'
     })
 

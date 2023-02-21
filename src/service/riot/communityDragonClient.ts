@@ -8,6 +8,6 @@ const COMMUNITY_DRAGON_KR_BASE_URL = process.env.COMMUNITY_DRAGON_KR_BASE_URL
 console.log(COMMUNITY_DRAGON_KR_BASE_URL)
 
 const communityClient: AxiosInstance = axios.create({
-  baseURL: COMMUNITY_DRAGON_KR_BASE_URL,
+  baseURL: `${COMMUNITY_DRAGON_KR_BASE_URL}/v1`,
 })
 export default communityClient
