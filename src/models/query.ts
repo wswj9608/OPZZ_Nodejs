@@ -2,4 +2,4 @@ export const insertItems = 'INSERT INTO item_info (item_id, name, description, t
 
 export const selectItems = 'SELECT distinct(item_id),name,description,total_gold FROM item_info WHERE item_id in ?'
 
-export const selectSpells = 'SELECT image_url,spell_id,file_name FROM spell_icon WHERE spell_id = ? || spell_id = ?'
+export const selectSpells = 'SELECT image_url,spell_id,file_name FROM spell_icon WHERE spell_id in ?'
