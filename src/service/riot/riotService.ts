@@ -1,18 +1,42 @@
 import communityClient from './communityDragonClient'
 import { krRiotClient, asiaRiotClient } from './riotClient'
-import { Item, Match, SummonerInfo, SummonerProfile } from './types'
+import { Item, RiotLeague, Match, SummonerInfo, SummonerProfile, League } from './types'
 import { getConnection } from '../../util/mysql'
 import * as query from '../../models/query'
-import { arrayPushNull } from '../../util'
+import { arrayPushNull, timeForToday } from '../../util'
 
 const COMMUNITY_DRAGON_DEFAULT_BASE_URL = process.env.COMMUNITY_DRAGON_DEFAULT_BASE_URL
 
+const getLeagues = async (summonerId: string) => {
+  try {
+    const { data } = await krRiotClient.get<RiotLeague[]>(`/lol/league/v4/entries/by-summoner/${summonerId}`)
+    const leagues = data.map(league => {
+      const { queueType, leaguePoints, wins, losses, tier, rank } = league
+
+      return { queueType, leaguePoints, tier, rank, wins, losses }
+    })
+
+    return leagues
+  } catch (err) {
+    return err.message
+  }
+}
 export const getSummonerProfile = async (summonerName: string): Promise<SummonerProfile> => {
   try {
     // summoner profile
-    const { name, id, puuid, summonerLevel, profileIconId } = (
-      await krRiotClient.get<SummonerInfo>(`/lol/summoner/v4/summoners/by-name/${summonerName}`)
-    ).data
+    const { data: profileRes } = await krRiotClient.get<SummonerInfo>(
+      `/lol/summoner/v4/summoners/by-name/${summonerName}`
+    )
+    const { name, id, puuid, summonerLevel, profileIconId } = profileRes
+
+    const { data: leaguesRes } = await krRiotClient.get<RiotLeague[]>(`/lol/league/v4/entries/by-summoner/${id}`)
+
+    const leagues: League[] = leaguesRes.map(league => {
+      const { queueType, leaguePoints, wins, losses, tier, rank } = league
+
+      return { queueType, leaguePoints, tier, rank, wins, losses }
+    })
+
     const summonerIconImageUrl = `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/profile-icons/${profileIconId}.jpg`
 
     const summoner: SummonerProfile = {
@@ -20,6 +44,7 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
       name,
       summonerLevel,
       summonerIconImageUrl,
+      leagues,
     }
 
     // return summonerIcon;
@@ -60,17 +85,17 @@ const getSummonerSpellIcons = (
   })
 }
 
-export const getMatches = async (puuid: string, searchName: string): Promise<any[]> => {
+export const getMatches = async (puuid: string): Promise<any[]> => {
   try {
-    const matchIds = (await asiaRiotClient.get<string[]>(`/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=2`))
-      .data
-    console.log(matchIds)
+    const { data: matchIds } = await asiaRiotClient.get<string[]>(
+      `/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=2`
+    )
 
     const matches = await Promise.all(
       matchIds.map(async id => {
-        const res: Match = (await asiaRiotClient.get(`/lol/match/v5/matches/${id}`)).data
+        const { data } = await asiaRiotClient.get<Match>(`/lol/match/v5/matches/${id}`)
 
-        const { gameId, gameEndTimestamp, gameDuration, participants, teams } = res.info
+        const { gameId, gameEndTimestamp, gameDuration, participants, teams } = data.info
 
         const allMatchItemIds: number[] = []
         const allMatchSpellIds: number[] = []
@@ -87,8 +112,8 @@ export const getMatches = async (puuid: string, searchName: string): Promise<any
         const allMatchSpells = await getSummonerSpellIcons(uniqeSpellIds)
 
         const gameDurationMinute = new Date(gameDuration * 1000).getMinutes()
-        const searchSummonerTeamId = participants.find(el => el.summonerName === searchName).teamId
-        const searchSummonerTeam = teams.find(team => team.teamId === searchSummonerTeamId)
+        const gameDurationTime = new Date(gameDuration * 1000 + 1000).toISOString().slice(14, 19)
+        const gameEndTimeStampForToday = timeForToday(new Date(gameEndTimestamp))
 
         const playerMatchDatas = await Promise.all(
           participants.map(async participant => {
@@ -105,7 +130,7 @@ export const getMatches = async (puuid: string, searchName: string): Promise<any
             const primaryPerkId = perks.styles.find(style => style.description === 'primaryStyle')?.selections[0].perk
             const subPerkStyleId = perks.styles.find(style => style.description === 'subStyle')?.style
 
-            const data = {
+            const matchResponseData = {
               summonerName: participant.summonerName,
               kills: participant.kills,
               assists: participant.assists,
@@ -132,14 +157,14 @@ export const getMatches = async (puuid: string, searchName: string): Promise<any
               summonerSpells: spells,
             }
 
-            return data
+            return matchResponseData
           })
         )
 
         const match = {
           gameId,
-          gameEndTimestamp,
-          gameDurationMinute,
+          gameEndTimestamp: gameEndTimeStampForToday,
+          gameDuration: gameDurationTime,
           playerMatchDatas,
         }
         return match

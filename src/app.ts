@@ -6,6 +6,7 @@ import path from 'path'
 import bluebird from 'bluebird'
 import dotenv from 'dotenv'
 import mysql from 'mysql'
+import cors from 'cors'
 
 // Controllers (route handlers)
 import * as homeController from './controllers/home'
@@ -25,6 +26,7 @@ mysql.createConnection(dbConfig)
 // Express configuration
 dotenv.config()
 
+app.use(cors())
 app.set('port', process.env.EXPRESS_PORT)
 app.set('view engine', 'pug')
 app.use(compression())

@@ -13,6 +13,32 @@ export interface SummonerProfile {
   name: string
   summonerLevel: number
   summonerIconImageUrl: string
+  leagues: League[]
+}
+
+export interface League {
+  queueType: 'RANKED_SOLO_5x5' | 'RANKED_FLEX_SR'
+  leaguePoints: number
+  tier: string
+  rank: string
+  wins: number
+  losses: number
+}
+
+export interface RiotLeague {
+  leagueId: string
+  queueType: 'RANKED_SOLO_5x5' | 'RANKED_FLEX_SR'
+  tier: string
+  rank: string
+  summonerId: string
+  summonerName: string
+  leaguePoints: number
+  wins: number
+  losses: number
+  veteran: boolean
+  inactive: boolean
+  freshBlood: boolean
+  hotStreak: boolean
 }
 
 export interface Team {

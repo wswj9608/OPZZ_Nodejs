@@ -4,8 +4,8 @@ import * as riotService from '../service/riot/riotService'
 export const getSummoner = async (req: Request, res: Response): Promise<void> => {
   const summonerName = req.params.summonerName
 
-  const data = await riotService.getSummonerProfile(summonerName)
+  const summonerProfile = await riotService.getSummonerProfile(summonerName)
 
-  const data2 = await riotService.getMatches(data.id, summonerName)
-  res.json({ ...data, ...data2 })
+  const matches = await riotService.getMatches(summonerProfile.id)
+  res.json({ summonerProfile, matches })
 }
