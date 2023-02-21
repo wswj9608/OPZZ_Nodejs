@@ -259,15 +259,27 @@ export interface Match {
       wardsKilled: number
       wardsPlaced: number
       win: boolean
+      totalDamageDealt: number
+      totalDamageDealtToChampions: number
+      totalDamageTaken: number
     }[]
     teams: Team[]
     tournamentCode: string
   }
 }
 
-export interface Item {
+export interface ItemDb {
   item_id: number
   name: string
+  icon_name: string
   description: string
   total_gold: number
+}
+
+export interface Item {
+  itemId: number
+  name: string
+  iconImageUrl: string
+  description: string
+  totalGold: number
 }

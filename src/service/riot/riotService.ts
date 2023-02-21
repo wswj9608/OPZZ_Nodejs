@@ -1,6 +1,6 @@
 import communityClient from './communityDragonClient'
 import { krRiotClient, asiaRiotClient } from './riotClient'
-import { Item, RiotLeague, Match, SummonerInfo, SummonerProfile, League } from './types'
+import { ItemDb, RiotLeague, Match, SummonerInfo, SummonerProfile, League, Item } from './types'
 import { getConnection } from '../../util/mysql'
 import * as query from '../../models/query'
 import { arrayPushNull, timeForToday } from '../../util'
@@ -37,7 +37,7 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
       return { queueType, leaguePoints, tier, rank, wins, losses }
     })
 
-    const summonerIconImageUrl = `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/profile-icons/${profileIconId}.jpg`
+    const summonerIconImageUrl = `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/v1/profile-icons/${profileIconId}.jpg`
 
     const summoner: SummonerProfile = {
       id: puuid,
@@ -57,13 +57,22 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
 const getItems = async (itemIds: number[]): Promise<Item[]> => {
   return new Promise((resolve, reject) => {
     getConnection(conn => {
-      conn.query(query.selectItems, [[itemIds]], async (err, result) => {
+      conn.query(query.selectItems, [[itemIds]], async (err, result: ItemDb[]) => {
         if (err) {
           conn.rollback()
         }
-        const items = arrayPushNull(result)
 
-        resolve(items)
+        const items = result.map(item => ({
+          itemId: item.item_id,
+          name: item.name,
+          iconImageUrl: `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/assets/items/icons2d/${item.icon_name.toLowerCase()}`,
+          description: item.description,
+          totalGold: item.total_gold,
+        }))
+
+        const responseItems = arrayPushNull(items)
+
+        resolve(responseItems)
       })
       conn.release()
     })
@@ -115,13 +124,19 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
         const gameDurationTime = new Date(gameDuration * 1000 + 1000).toISOString().slice(14, 19)
         const gameEndTimeStampForToday = timeForToday(new Date(gameEndTimestamp))
 
+        const totalDamageDealtToChampionArr = participants.map(el => el.totalDamageDealtToChampions)
+        const totalDamageTakenArr = participants.map(el => el.totalDamageTaken)
+
+        const maxDamageToChampion = Math.max(...totalDamageDealtToChampionArr)
+        const maxDamageTaken = Math.max(...totalDamageTakenArr)
+
         const playerMatchDatas = await Promise.all(
           participants.map(async participant => {
             const { item0, item1, item2, item3, item4, item5, item6, perks, summoner1Id, summoner2Id } = participant
             const { kda, killParticipation } = participant.challenges
 
             const itemIds = [item0, item1, item2, item3, item4, item5, item6]
-            const items = itemIds.map(itemId => allMatchItems.find(item => item.item_id === itemId))
+            const items = itemIds.map(itemId => allMatchItems.find(item => item.itemId === itemId))
 
             const spellIds = [summoner1Id, summoner2Id]
             const spells = spellIds.map(spellId => allMatchSpells.find(spell => spell.spell_id === spellId))
@@ -129,6 +144,11 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
             const minionsPerMinute = Number((participant.totalMinionsKilled / gameDurationMinute).toFixed(1))
             const primaryPerkId = perks.styles.find(style => style.description === 'primaryStyle')?.selections[0].perk
             const subPerkStyleId = perks.styles.find(style => style.description === 'subStyle')?.style
+
+            const { totalDamageDealtToChampions, totalDamageDealt, totalDamageTaken } = participant
+
+            const damageDealtToChampionPercent = Math.round((totalDamageDealtToChampions / maxDamageToChampion) * 100)
+            const damageTakenPercent = Math.round((totalDamageTaken / maxDamageTaken) * 100)
 
             const matchResponseData = {
               summonerName: participant.summonerName,
@@ -138,7 +158,7 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
               champion: {
                 championName: participant.championName,
                 championLevel: participant.champLevel,
-                championIcon: `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/champion-icons/${participant.championId}.png`,
+                championIcon: `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/v1/champion-icons/${participant.championId}.png`,
               },
               items,
               teamId: participant.teamId,
@@ -155,6 +175,11 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
               primaryPerkId,
               subPerkStyleId,
               summonerSpells: spells,
+              totalDamageDealt: participant.totalDamageDealt,
+              totalDamageDealtToChampion: participant.totalDamageDealtToChampions,
+              totalDamageTaken: participant.totalDamageTaken,
+              damageDealtToChampionPercent,
+              damageTakenPercent,
             }
 
             return matchResponseData
