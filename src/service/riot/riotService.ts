@@ -27,7 +27,7 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
     const { data: profileRes } = await krRiotClient.get<SummonerInfo>(
       `/lol/summoner/v4/summoners/by-name/${summonerName}`
     )
-    const { name, id, puuid, summonerLevel, profileIconId } = profileRes
+    const { name, id, puuid, summonerLevel, profileIconId, accountId } = profileRes
 
     const { data: leaguesRes } = await krRiotClient.get<RiotLeague[]>(`/lol/league/v4/entries/by-summoner/${id}`)
 
@@ -41,6 +41,7 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
 
     const summoner: SummonerProfile = {
       id: puuid,
+      accountId,
       name,
       summonerLevel,
       summonerIconImageUrl,
@@ -60,6 +61,7 @@ const getItems = async (itemIds: number[]): Promise<Item[]> => {
       conn.query(query.selectItems, [[itemIds]], async (err, result: ItemDb[]) => {
         if (err) {
           conn.rollback()
+          reject()
         }
 
         const items = result.map(item => ({
@@ -97,7 +99,7 @@ const getSummonerSpellIcons = (
 export const getMatches = async (puuid: string): Promise<any[]> => {
   try {
     const { data: matchIds } = await asiaRiotClient.get<string[]>(
-      `/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=2`
+      `/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`
     )
 
     const matches = await Promise.all(
@@ -175,9 +177,9 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
               primaryPerkId,
               subPerkStyleId,
               summonerSpells: spells,
-              totalDamageDealt: participant.totalDamageDealt,
-              totalDamageDealtToChampion: participant.totalDamageDealtToChampions,
-              totalDamageTaken: participant.totalDamageTaken,
+              totalDamageDealt,
+              totalDamageDealtToChampions,
+              totalDamageTaken,
               damageDealtToChampionPercent,
               damageTakenPercent,
             }
@@ -186,12 +188,28 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
           })
         )
 
+        const friendlyTeamId = participants.find(el => el.puuid === puuid).teamId
+        const friendlyTeam = teams.find(team => team.teamId === friendlyTeamId)
+        const friendlyParticipant = participants.filter(el => el.teamId === friendlyTeamId)
+        const golds = participants.map(({ teamId, goldEarned }) => ({
+          teamId,
+          goldEarned,
+        }))
+        // const friendlyTeamTotalGold = participants.map((el) => el.)
+        const enemyTeam = teams.find(team => team.teamId !== friendlyTeamId)
+
         const match = {
           gameId,
           gameEndTimestamp: gameEndTimeStampForToday,
           gameDuration: gameDurationTime,
           playerMatchDatas,
+          friendlyTeam: {
+            ...friendlyTeam,
+            // totalGold : golds.find((gold) => gold.teamId ===  )
+          },
+          enemyTeam,
         }
+
         return match
       })
     )

@@ -10,6 +10,7 @@ export interface SummonerInfo {
 
 export interface SummonerProfile {
   id: string
+  accountId: string
   name: string
   summonerLevel: number
   summonerIconImageUrl: string
@@ -200,6 +201,7 @@ export interface Match {
     gameDuration: number
     gameEndTimestamp: number
     gameId: number
+    puuid: string
     mapId: number
     participants: {
       summonerSpells: any[]
