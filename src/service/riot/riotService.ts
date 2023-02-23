@@ -190,24 +190,31 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
 
         const friendlyTeamId = participants.find(el => el.puuid === puuid).teamId
         const friendlyTeam = teams.find(team => team.teamId === friendlyTeamId)
-        const friendlyParticipant = participants.filter(el => el.teamId === friendlyTeamId)
-        const golds = participants.map(({ teamId, goldEarned }) => ({
-          teamId,
-          goldEarned,
-        }))
-        // const friendlyTeamTotalGold = participants.map((el) => el.)
         const enemyTeam = teams.find(team => team.teamId !== friendlyTeamId)
+
+        const totalGold: { [key: number]: number } = {
+          100: 0,
+          200: 0,
+        }
+
+        participants.forEach(({ teamId, goldEarned }) => {
+          totalGold[teamId] += goldEarned
+        })
 
         const match = {
           gameId,
           gameEndTimestamp: gameEndTimeStampForToday,
           gameDuration: gameDurationTime,
           playerMatchDatas,
+          totalGold,
           friendlyTeam: {
             ...friendlyTeam,
-            // totalGold : golds.find((gold) => gold.teamId ===  )
+            totalGold: totalGold[friendlyTeam.teamId],
           },
-          enemyTeam,
+          enemyTeam: {
+            ...enemyTeam,
+            totalGold: totalGold[enemyTeam.teamId],
+          },
         }
 
         return match
