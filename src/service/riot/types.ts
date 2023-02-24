@@ -1,4 +1,6 @@
-export interface SummonerInfo {
+// riot api response types
+
+export interface RiotSummonerInfo {
   id: string
   accountId: string
   puuid: string
@@ -6,24 +8,6 @@ export interface SummonerInfo {
   profileIconId: number
   revisionDate: number
   summonerLevel: number
-}
-
-export interface SummonerProfile {
-  id: string
-  accountId: string
-  name: string
-  summonerLevel: number
-  summonerIconImageUrl: string
-  leagues: League[]
-}
-
-export interface League {
-  queueType: 'RANKED_SOLO_5x5' | 'RANKED_FLEX_SR'
-  leaguePoints: number
-  tier: string
-  rank: string
-  wins: number
-  losses: number
 }
 
 export interface RiotLeague {
@@ -42,7 +26,7 @@ export interface RiotLeague {
   hotStreak: boolean
 }
 
-export interface Team {
+export interface RiotTeam {
   bans: {
     championId: number
     pickTurn: number
@@ -77,7 +61,7 @@ export interface Team {
   win: boolean
 }
 
-interface Challenges {
+interface RiotChallenges {
   '12AssistStreakCount': number
   abilityUses: number
   acesBefore15Minutes: number
@@ -195,93 +179,197 @@ interface Challenges {
   wardsGuarded: number
 }
 
-export interface Match {
-  info: {
-    gameCreation: number
-    gameDuration: number
-    gameEndTimestamp: number
-    gameId: number
-    puuid: string
-    mapId: number
-    participants: {
-      summonerSpells: any[]
-      assists: number
-      champLevel: number
-      championId: number
-      championName: string
-      challenges: Challenges
-      deaths: number
-      doubleKills: number
-      firstBloodKill: boolean
-      firstTowerKill: boolean
-      goldEarned: number
-      neutralMinionsKilled: number
-      totalMinionsKilled: number
-      item0: number
-      item1: number
-      item2: number
-      item3: number
-      item4: number
-      item5: number
-      item6: number
-      kills: number
-      participantId: number
-      pentaKills: number
-      perks: {
-        statPerks: {
-          defense: number
-          flex: number
-          offense: number
-        }
-        styles: {
-          description: string
-          selections: {
-            perk: number
-            var1: number
-            var2: number
-            var3: number
-          }[]
-          style: number
-        }[]
+export interface RiotMatch {
+  gameCreation: number
+  gameDuration: number
+  gameEndTimestamp: number
+  gameId: number
+  puuid: string
+  mapId: number
+  participants: {
+    summonerSpells: any[]
+    assists: number
+    champLevel: number
+    championId: number
+    championName: string
+    challenges: RiotChallenges
+    deaths: number
+    doubleKills: number
+    firstBloodKill: boolean
+    firstTowerKill: boolean
+    goldEarned: number
+    neutralMinionsKilled: number
+    totalMinionsKilled: number
+    item0: number
+    item1: number
+    item2: number
+    item3: number
+    item4: number
+    item5: number
+    item6: number
+    kills: number
+    participantId: number
+    pentaKills: number
+    perks: {
+      statPerks: {
+        defense: number
+        flex: number
+        offense: number
       }
-      profileIcon: number
-      puuid: string
-      quadraKills: number
-      summoner1Casts: number
-      summoner1Id: number
-      summoner2Casts: number
-      summoner2Id: number
-      summonerLevel: number
-      summonerName: string
-      teamId: number
-      teamPosition: number
-      tripleKills: number
-      visionScore: number
-      visionWardsBoughtInGame: number
-      wardsKilled: number
-      wardsPlaced: number
-      win: boolean
-      totalDamageDealt: number
-      totalDamageDealtToChampions: number
-      totalDamageTaken: number
-    }[]
-    teams: Team[]
-    tournamentCode: string
-  }
+      styles: {
+        description: string
+        selections: {
+          perk: number
+          var1: number
+          var2: number
+          var3: number
+        }[]
+        style: number
+      }[]
+    }
+    profileIcon: number
+    puuid: string
+    quadraKills: number
+    summoner1Casts: number
+    summoner1Id: number
+    summoner2Casts: number
+    summoner2Id: number
+    summonerLevel: number
+    summonerName: string
+    teamId: number
+    teamPosition: number
+    tripleKills: number
+    visionScore: number
+    visionWardsBoughtInGame: number
+    wardsKilled: number
+    wardsPlaced: number
+    win: boolean
+    totalDamageDealt: number
+    totalDamageDealtToChampions: number
+    totalDamageTaken: number
+  }[]
+  teams: RiotTeam[]
+  tournamentCode: string
 }
 
-export interface ItemDb {
-  item_id: number
+// OPZZ response type
+export interface ResSummonerProfile {
+  id: string
+  accountId: string
   name: string
-  icon_name: string
-  description: string
-  total_gold: number
+  summonerLevel: number
+  summonerIconImageUrl: string
+  leagues: ResLeague[]
 }
 
-export interface Item {
+export interface ResLeague {
+  queueType: 'RANKED_SOLO_5x5' | 'RANKED_FLEX_SR'
+  leaguePoints: number
+  tier: string
+  rank: string
+  wins: number
+  losses: number
+}
+
+export interface ResItem {
   itemId: number
   name: string
   iconImageUrl: string
   description: string
   totalGold: number
+}
+
+export interface ResChampion {
+  championName: string
+  championLevel: number
+  championIcon: string
+}
+
+export interface ResChallenges {
+  kda: number
+  killParticipation: number
+}
+
+export interface ResSpell {
+  image_url: string
+  spell_id: number
+  file_name: string
+}
+
+export interface ResMatch {
+  summonerName: string
+  kills: number
+  assists: number
+  deaths: number
+  champion: ResChampion
+  items: ResItem[]
+  teamId: number
+  win: boolean
+  challenges: ResChallenges
+  visionWardsBoughtInGame: number
+  wradsKilled: number
+  wardsPlaced: number
+  totalMinionsKilled: number
+  minionsPerMinute: number
+  primaryPerkId: number
+  subPerkStyleId: number
+  summonerSpells: ResSpell[]
+  totalDamageDealt: number
+  totalDamageDealtToChampions: number
+  totalDamageTaken: number
+  damageDealtToChampionPercent: number
+  damageTakenPercent: number
+}
+
+export interface ResMatches {
+  gameDuration: string
+  gameEndTimestamp: string
+  gameId: number
+  playerMatchDatas: ResMatch[]
+  friendlyTeam: ResTeam
+  enemyTeam: ResTeam
+}
+
+export interface ResTeam {
+  bans: {
+    championId: number
+    pickTurn: number
+  }[]
+  objectives: {
+    baron: {
+      first: boolean
+      kills: number
+    }
+    champion: {
+      first: boolean
+      kills: number
+    }
+    dragon: {
+      first: boolean
+      kills: number
+    }
+    inhibitor: {
+      first: boolean
+      kills: number
+    }
+    riftHerald: {
+      first: boolean
+      kills: number
+    }
+    tower: {
+      first: boolean
+      kills: number
+    }
+  }
+  teamId: number
+  win: boolean
+  totalGold: number
+}
+
+export interface DbItem {
+  item_id: number
+  name: string
+  icon_name: string
+  description: string
+  total_gold: number
 }

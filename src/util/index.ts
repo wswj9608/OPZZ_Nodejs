@@ -1,6 +1,6 @@
-import { Item } from '@/service/riot/types'
+import { ResItem, ResMatches } from '@/service/riot/types'
 
-export const arrayPushNull = (items: Item[]): Item[] => {
+export const arrayPushNull = (items: ResItem[]): ResItem[] => {
   const payload = items.slice()
 
   for (let i = 0; i < 7 - items.length; i++) {
@@ -31,4 +31,16 @@ export const timeForToday = (value: Date) => {
   }
 
   return `${Math.floor(betweenTimeDay / 365)}년전`
+}
+
+export const sumDataInMatches = (
+  matches: ResMatches[],
+  summonerName: string,
+  key: 'kills' | 'deaths' | 'assists'
+): number => {
+  const sumNumber = matches
+    .map(match => match.playerMatchDatas.find(data => data.summonerName === summonerName)[key])
+    .reduce((a, b) => a + b)
+
+  return sumNumber
 }

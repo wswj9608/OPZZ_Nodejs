@@ -1,37 +1,33 @@
 import communityClient from './communityDragonClient'
 import { krRiotClient, asiaRiotClient } from './riotClient'
-import { ItemDb, RiotLeague, Match, SummonerInfo, SummonerProfile, League, Item } from './types'
+import {
+  DbItem,
+  RiotLeague,
+  RiotMatch,
+  RiotSummonerInfo,
+  ResSummonerProfile,
+  ResLeague,
+  ResItem,
+  ResMatch,
+  ResMatches,
+} from './types'
 import { getConnection } from '../../util/mysql'
 import * as query from '../../models/query'
-import { arrayPushNull, timeForToday } from '../../util'
+import { arrayPushNull, sumDataInMatches, timeForToday } from '../../util'
 
 const COMMUNITY_DRAGON_DEFAULT_BASE_URL = process.env.COMMUNITY_DRAGON_DEFAULT_BASE_URL
 
-const getLeagues = async (summonerId: string) => {
-  try {
-    const { data } = await krRiotClient.get<RiotLeague[]>(`/lol/league/v4/entries/by-summoner/${summonerId}`)
-    const leagues = data.map(league => {
-      const { queueType, leaguePoints, wins, losses, tier, rank } = league
-
-      return { queueType, leaguePoints, tier, rank, wins, losses }
-    })
-
-    return leagues
-  } catch (err) {
-    return err.message
-  }
-}
-export const getSummonerProfile = async (summonerName: string): Promise<SummonerProfile> => {
+export const getSummonerProfile = async (summonerName: string): Promise<ResSummonerProfile> => {
   try {
     // summoner profile
-    const { data: profileRes } = await krRiotClient.get<SummonerInfo>(
+    const { data: profileRes } = await krRiotClient.get<RiotSummonerInfo>(
       `/lol/summoner/v4/summoners/by-name/${summonerName}`
     )
     const { name, id, puuid, summonerLevel, profileIconId, accountId } = profileRes
 
     const { data: leaguesRes } = await krRiotClient.get<RiotLeague[]>(`/lol/league/v4/entries/by-summoner/${id}`)
 
-    const leagues: League[] = leaguesRes.map(league => {
+    const leagues: ResLeague[] = leaguesRes.map(league => {
       const { queueType, leaguePoints, wins, losses, tier, rank } = league
 
       return { queueType, leaguePoints, tier, rank, wins, losses }
@@ -39,7 +35,7 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
 
     const summonerIconImageUrl = `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/v1/profile-icons/${profileIconId}.jpg`
 
-    const summoner: SummonerProfile = {
+    const summoner: ResSummonerProfile = {
       id: puuid,
       accountId,
       name,
@@ -55,10 +51,10 @@ export const getSummonerProfile = async (summonerName: string): Promise<Summoner
   }
 }
 
-const getItems = async (itemIds: number[]): Promise<Item[]> => {
+const getItems = async (itemIds: number[]): Promise<ResItem[]> => {
   return new Promise((resolve, reject) => {
     getConnection(conn => {
-      conn.query(query.selectItems, [[itemIds]], async (err, result: ItemDb[]) => {
+      conn.query(query.selectItems, [[itemIds]], async (err, result: DbItem[]) => {
         if (err) {
           conn.rollback()
           reject()
@@ -96,7 +92,10 @@ const getSummonerSpellIcons = (
   })
 }
 
-export const getMatches = async (puuid: string): Promise<any[]> => {
+export const getMatches = async (
+  puuid: string,
+  summonerName: string
+): Promise<{ matches: ResMatches[]; statistics: any }> => {
   try {
     const { data: matchIds } = await asiaRiotClient.get<string[]>(
       `/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`
@@ -104,7 +103,7 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
 
     const matches = await Promise.all(
       matchIds.map(async id => {
-        const { data } = await asiaRiotClient.get<Match>(`/lol/match/v5/matches/${id}`)
+        const { data } = await asiaRiotClient.get<{ info: RiotMatch }>(`/lol/match/v5/matches/${id}`)
 
         const { gameId, gameEndTimestamp, gameDuration, participants, teams } = data.info
 
@@ -152,7 +151,7 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
             const damageDealtToChampionPercent = Math.round((totalDamageDealtToChampions / maxDamageToChampion) * 100)
             const damageTakenPercent = Math.round((totalDamageTaken / maxDamageTaken) * 100)
 
-            const matchResponseData = {
+            const matchResponseData: ResMatch = {
               summonerName: participant.summonerName,
               kills: participant.kills,
               assists: participant.assists,
@@ -220,7 +219,32 @@ export const getMatches = async (puuid: string): Promise<any[]> => {
         return match
       })
     )
-    return matches
+
+    const totalMatchNumber = matches.length
+    const totalWins = matches.filter(match => match.friendlyTeam.win === true).length
+    const totalLosses = totalMatchNumber - totalWins
+    const averageKills = sumDataInMatches(matches, summonerName, 'kills') / totalMatchNumber
+    const averageDeaths = Number((sumDataInMatches(matches, summonerName, 'deaths') / totalMatchNumber).toFixed(1))
+    const averageAssists = sumDataInMatches(matches, summonerName, 'assists') / totalMatchNumber
+    const totalTeamKills = matches.map(match => match.friendlyTeam.objectives.champion.kills).reduce((a, b) => a + b)
+    const averageKda = Number(((averageKills + averageAssists) / averageDeaths).toFixed(2))
+    const killParticipationRate = Math.round(
+      ((sumDataInMatches(matches, summonerName, 'kills') + sumDataInMatches(matches, summonerName, 'assists')) /
+        totalTeamKills) *
+        100
+    )
+
+    const statistics = {
+      totalMatchNumber,
+      totalWins,
+      totalLosses,
+      averageKills,
+      averageDeaths,
+      averageAssists,
+      averageKda,
+      killParticipationRate,
+    }
+    return { matches, statistics }
   } catch (err) {
     return err.message
   }
