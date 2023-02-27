@@ -192,7 +192,7 @@ export interface RiotMatch {
     champLevel: number
     championId: number
     championName: string
-    challenges: RiotChallenges
+    challenges?: RiotChallenges
     deaths: number
     doubleKills: number
     firstBloodKill: boolean
@@ -248,6 +248,8 @@ export interface RiotMatch {
     totalDamageDealtToChampions: number
     totalDamageTaken: number
   }[]
+  platformId: string
+  queueId: number
   teams: RiotTeam[]
   tournamentCode: string
 }
@@ -280,6 +282,7 @@ export interface ResItem {
 }
 
 export interface ResChampion {
+  championId: number
   championName: string
   championLevel: number
   championIcon: string
@@ -297,6 +300,7 @@ export interface ResSpell {
 }
 
 export interface ResMatch {
+  puuid: string
   summonerName: string
   kills: number
   assists: number
@@ -319,15 +323,6 @@ export interface ResMatch {
   totalDamageTaken: number
   damageDealtToChampionPercent: number
   damageTakenPercent: number
-}
-
-export interface ResMatches {
-  gameDuration: string
-  gameEndTimestamp: string
-  gameId: number
-  playerMatchDatas: ResMatch[]
-  friendlyTeam: ResTeam
-  enemyTeam: ResTeam
 }
 
 export interface ResTeam {
@@ -364,6 +359,29 @@ export interface ResTeam {
   teamId: number
   win: boolean
   totalGold: number
+}
+
+export interface ResMatches {
+  gameDuration: string
+  gameEndTimestamp: string
+  gameId: number
+  queueId: number
+  queueType: string
+  playerMatchDatas: ResMatch[]
+  friendlyTeam: ResTeam
+  enemyTeam: ResTeam
+}
+
+export interface ResStatistics {
+  totalMatchNumber: number
+  totalWins: number
+  totalLosses: number
+  averageKills: number
+  averageDeaths: number
+  averageAssists: number
+  averageKda: number
+  killParticipationRate: number
+  playedChampions: any
 }
 
 export interface DbItem {

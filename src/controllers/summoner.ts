@@ -6,7 +6,7 @@ export const getSummoner = async (req: Request, res: Response): Promise<void> =>
 
   const summonerProfile = await riotService.getSummonerProfile(summonerName)
 
-  const matchHistory = await riotService.getMatches(summonerProfile.id, summonerName)
+  const matchHistory = await riotService.getMatchHistory(summonerProfile.id)
 
   res.json({ summonerProfile, matchHistory })
 }

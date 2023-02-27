@@ -1,4 +1,4 @@
-import { ResItem, ResMatches } from '@/service/riot/types'
+import { ResChampion, ResItem, ResMatches } from '@/service/riot/types'
 
 export const arrayPushNull = (items: ResItem[]): ResItem[] => {
   const payload = items.slice()
@@ -33,14 +33,41 @@ export const timeForToday = (value: Date) => {
   return `${Math.floor(betweenTimeDay / 365)}년전`
 }
 
-export const sumDataInMatches = (
-  matches: ResMatches[],
-  summonerName: string,
-  key: 'kills' | 'deaths' | 'assists'
-): number => {
+export const sumDataInMatches = (matches: ResMatches[], puuid: string, key: 'kills' | 'deaths' | 'assists'): number => {
   const sumNumber = matches
-    .map(match => match.playerMatchDatas.find(data => data.summonerName === summonerName)[key])
+    .map(match => match.playerMatchDatas.find(data => data.puuid === puuid)[key])
     .reduce((a, b) => a + b)
 
   return sumNumber
 }
+
+export const getQueueType = (queueId: number) => {
+  if (queueId === 420) return '솔랭'
+  if (queueId === 430) return '일반'
+  if (queueId === 440) return '자유 5:5 랭크'
+  if (queueId === 900) return '모두 무작위 U.R.F.'
+  return '무작위 총력전'
+}
+
+interface PlayedChampions {
+  [key: number]: {
+    championId: number
+    chmapionIcon: string
+    championName: string
+    matchNumber: number
+  }
+}
+
+export const getChmapionCount = (champions: ResChampion[]): PlayedChampions =>
+  champions.reduce(
+    (ac: { [key: number]: any }, v) => ({
+      ...ac,
+      [v.championId]: {
+        championId: v.championId,
+        championIcon: v.championIcon,
+        championName: v.championName,
+        matchNumber: (ac[v.championId].matchNumber || 0) + 1,
+      },
+    }),
+    {}
+  )

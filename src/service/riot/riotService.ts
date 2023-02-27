@@ -13,7 +13,7 @@ import {
 } from './types'
 import { getConnection } from '../../util/mysql'
 import * as query from '../../models/query'
-import { arrayPushNull, sumDataInMatches, timeForToday } from '../../util'
+import { arrayPushNull, getChmapionCount, getQueueType, sumDataInMatches, timeForToday } from '../../util'
 
 const COMMUNITY_DRAGON_DEFAULT_BASE_URL = process.env.COMMUNITY_DRAGON_DEFAULT_BASE_URL
 
@@ -92,10 +92,7 @@ const getSummonerSpellIcons = (
   })
 }
 
-export const getMatches = async (
-  puuid: string,
-  summonerName: string
-): Promise<{ matches: ResMatches[]; statistics: any }> => {
+export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatches[]; statistics: any }> => {
   try {
     const { data: matchIds } = await asiaRiotClient.get<string[]>(
       `/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`
@@ -104,8 +101,10 @@ export const getMatches = async (
     const matches = await Promise.all(
       matchIds.map(async id => {
         const { data } = await asiaRiotClient.get<{ info: RiotMatch }>(`/lol/match/v5/matches/${id}`)
+        // console.log(data.par)
 
-        const { gameId, gameEndTimestamp, gameDuration, participants, teams } = data.info
+        const { gameId, gameEndTimestamp, gameDuration, participants, teams, queueId } = data.info
+        console.log(participants)
 
         const allMatchItemIds: number[] = []
         const allMatchSpellIds: number[] = []
@@ -133,8 +132,27 @@ export const getMatches = async (
 
         const playerMatchDatas = await Promise.all(
           participants.map(async participant => {
-            const { item0, item1, item2, item3, item4, item5, item6, perks, summoner1Id, summoner2Id } = participant
-            const { kda, killParticipation } = participant.challenges
+            const {
+              item0,
+              item1,
+              item2,
+              item3,
+              item4,
+              item5,
+              item6,
+              perks,
+              summoner1Id,
+              summoner2Id,
+              kills,
+              deaths,
+              assists,
+            } = participant
+            // const { kda, killParticipation } = participant?.challenges
+            const searchSummonerTeam = teams.find(team => team.teamId === participant.teamId)
+            const killParticipation = Math.round(
+              ((kills + assists) / searchSummonerTeam.objectives.champion.kills) * 100
+            )
+            const kda = Number(((kills + assists) / deaths).toFixed(2))
 
             const itemIds = [item0, item1, item2, item3, item4, item5, item6]
             const items = itemIds.map(itemId => allMatchItems.find(item => item.itemId === itemId))
@@ -152,11 +170,13 @@ export const getMatches = async (
             const damageTakenPercent = Math.round((totalDamageTaken / maxDamageTaken) * 100)
 
             const matchResponseData: ResMatch = {
+              puuid: participant.puuid,
               summonerName: participant.summonerName,
-              kills: participant.kills,
-              assists: participant.assists,
-              deaths: participant.deaths,
+              kills,
+              assists,
+              deaths,
               champion: {
+                championId: participant.championId,
                 championName: participant.championName,
                 championLevel: participant.champLevel,
                 championIcon: `${COMMUNITY_DRAGON_DEFAULT_BASE_URL}/v1/champion-icons/${participant.championId}.png`,
@@ -165,8 +185,8 @@ export const getMatches = async (
               teamId: participant.teamId,
               win: participant.win,
               challenges: {
-                kda: Number(kda.toFixed(2)),
-                killParticipation: Math.round(killParticipation * 100),
+                kda,
+                killParticipation,
               },
               visionWardsBoughtInGame: participant.visionWardsBoughtInGame,
               wradsKilled: participant.wardsKilled,
@@ -205,6 +225,8 @@ export const getMatches = async (
           gameEndTimestamp: gameEndTimeStampForToday,
           gameDuration: gameDurationTime,
           playerMatchDatas,
+          queueId,
+          queueType: getQueueType(queueId),
           totalGold,
           friendlyTeam: {
             ...friendlyTeam,
@@ -223,16 +245,32 @@ export const getMatches = async (
     const totalMatchNumber = matches.length
     const totalWins = matches.filter(match => match.friendlyTeam.win === true).length
     const totalLosses = totalMatchNumber - totalWins
-    const averageKills = sumDataInMatches(matches, summonerName, 'kills') / totalMatchNumber
-    const averageDeaths = Number((sumDataInMatches(matches, summonerName, 'deaths') / totalMatchNumber).toFixed(1))
-    const averageAssists = sumDataInMatches(matches, summonerName, 'assists') / totalMatchNumber
+    const averageKills = sumDataInMatches(matches, puuid, 'kills') / totalMatchNumber
+    const averageDeaths = Number((sumDataInMatches(matches, puuid, 'deaths') / totalMatchNumber).toFixed(1))
+    const averageAssists = sumDataInMatches(matches, puuid, 'assists') / totalMatchNumber
     const totalTeamKills = matches.map(match => match.friendlyTeam.objectives.champion.kills).reduce((a, b) => a + b)
     const averageKda = Number(((averageKills + averageAssists) / averageDeaths).toFixed(2))
     const killParticipationRate = Math.round(
-      ((sumDataInMatches(matches, summonerName, 'kills') + sumDataInMatches(matches, summonerName, 'assists')) /
-        totalTeamKills) *
-        100
+      ((sumDataInMatches(matches, puuid, 'kills') + sumDataInMatches(matches, puuid, 'assists')) / totalTeamKills) * 100
     )
+
+    const rankMatches = matches.filter(match => match.queueId === 440 || match.queueId === 420)
+    const champions = rankMatches.map(el => el.playerMatchDatas.find(el => el.puuid === puuid).champion)
+    const playedChampions = getChmapionCount(champions)
+    // const playedChampion = {
+
+    // }
+
+    // const playedChampion = matches.find(match => {
+    //   const searchSummonerMatchDatas = match.playerMatchDatas.map(el => {
+    //     if (el.puuid === puuid) {
+    //       return el.champion
+    //     }
+    //   })
+
+    //   console.log(searchSummonerMatchDatas)
+    //   return searchSummonerMatchDatas
+    // })
 
     const statistics = {
       totalMatchNumber,
@@ -243,6 +281,7 @@ export const getMatches = async (
       averageAssists,
       averageKda,
       killParticipationRate,
+      playedChampions,
     }
     return { matches, statistics }
   } catch (err) {
