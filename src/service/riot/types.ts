@@ -185,6 +185,8 @@ export interface RiotMatch {
   gameEndTimestamp: number
   gameId: number
   puuid: string
+  role: string
+
   mapId: number
   participants: {
     summonerSpells: any[]
@@ -384,10 +386,32 @@ export interface ResStatistics {
   playedChampions: any
 }
 
+export interface ResChampionCount {
+  championId: number
+  championName: string
+  championIcon: string
+  kda: number
+  win: number
+  loss: number
+  winningRate: number
+  matchNumber: number
+}
+
 export interface DbItem {
   item_id: number
   name: string
   icon_name: string
   description: string
   total_gold: number
+}
+
+export interface PlayedChampions {
+  championId: number
+  championIcon: string
+  championName: string
+  matchNumber: number
+  kills: number
+  deaths: number
+  assists: number
+  win: number
 }

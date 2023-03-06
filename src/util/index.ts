@@ -48,26 +48,3 @@ export const getQueueType = (queueId: number) => {
   if (queueId === 900) return '모두 무작위 U.R.F.'
   return '무작위 총력전'
 }
-
-interface PlayedChampions {
-  [key: number]: {
-    championId: number
-    chmapionIcon: string
-    championName: string
-    matchNumber: number
-  }
-}
-
-export const getChmapionCount = (champions: ResChampion[]): PlayedChampions =>
-  champions.reduce(
-    (ac: { [key: number]: any }, v) => ({
-      ...ac,
-      [v.championId]: {
-        championId: v.championId,
-        championIcon: v.championIcon,
-        championName: v.championName,
-        matchNumber: (ac[v.championId].matchNumber || 0) + 1,
-      },
-    }),
-    {}
-  )
