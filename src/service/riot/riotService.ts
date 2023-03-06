@@ -12,6 +12,7 @@ import {
   ResMatches,
   PlayedChampions,
   ResChampionCount,
+  ChampionCountParam,
 } from './types'
 import { getConnection } from '../../util/mysql'
 import * as query from '../../models/query'
@@ -94,6 +95,48 @@ const getSummonerSpellIcons = (
   })
 }
 
+const getPlayedChampionCount = (champions: ChampionCountParam[]) => {
+  const playedChampions = champions.reduce((ac: { [key: string]: PlayedChampions }, v) => {
+    return {
+      ...ac,
+      [v.championName]: {
+        championId: v.championId,
+        championIcon: v.championIcon,
+        championName: v.championName,
+        kills: (ac[v.championName]?.kills || 0) + v.kills,
+        deaths: (ac[v.championName]?.deaths || 0) + v.deaths,
+        assists: (ac[v.championName]?.assists || 0) + v.assists,
+        win: (ac[v.championName]?.win || 0) + v.win,
+        matchNumber: (ac[v.championName]?.matchNumber || 0) + 1,
+      },
+    }
+  }, {})
+
+  const sortPlayedChampions: ResChampionCount[] = Object.values(playedChampions)
+    .sort((a, b) => b.matchNumber - a.matchNumber)
+    .map(({ championId, championName, championIcon, kills, deaths, assists, win, matchNumber }) => ({
+      championId,
+      championName,
+      championIcon,
+      kda: Number(((kills + assists) / deaths).toFixed(2)),
+      win,
+      loss: matchNumber - win,
+      winningRate: Math.round((win / matchNumber) * 100),
+      matchNumber,
+    }))
+
+  return sortPlayedChampions
+}
+
+const getPlayedPositionCount = (positions: string[]) =>
+  positions.reduce((ac: { [key: string]: number }, v) => ({ ...ac, [v]: (ac[v] || 0) + 1 }), {
+    TOP: 0,
+    JUNGLE: 0,
+    MIDDLE: 0,
+    ADC: 0,
+    SUPPORT: 0,
+  })
+
 export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatches[]; statistics: any }> => {
   try {
     const { data: matchIds } = await asiaRiotClient.get<string[]>(
@@ -147,6 +190,12 @@ export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatc
               kills,
               deaths,
               assists,
+              role,
+              lane,
+              doubleKills,
+              tripleKills,
+              quadraKills,
+              pentaKills,
             } = participant
             // const { kda, killParticipation } = participant?.challenges
             const searchSummonerTeam = teams.find(team => team.teamId === participant.teamId)
@@ -170,12 +219,39 @@ export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatc
             const damageDealtToChampionPercent = Math.round((totalDamageDealtToChampions / maxDamageToChampion) * 100)
             const damageTakenPercent = Math.round((totalDamageTaken / maxDamageTaken) * 100)
 
+            const mostMultiKills = () => {
+              if (pentaKills) {
+                return '펜타킬'
+              } else if (quadraKills) {
+                return '쿼드라킬'
+              } else if (tripleKills) {
+                return '트리플킬'
+              } else if (doubleKills) {
+                return '더블킬'
+              } else {
+                return null
+              }
+            }
+
+            const teamPosition = () => {
+              const position = participant.teamPosition
+
+              if (position === 'UTILITY') return 'SUPPORT'
+
+              if (position === 'BOTTOM') return 'ADC'
+
+              return position
+            }
+
             const matchResponseData: ResMatch = {
               puuid: participant.puuid,
               summonerName: participant.summonerName,
               kills,
               assists,
               deaths,
+              role,
+              lane,
+              teamPosition: teamPosition(),
               champion: {
                 championId: participant.championId,
                 championName: participant.championName,
@@ -202,6 +278,7 @@ export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatc
               totalDamageTaken,
               damageDealtToChampionPercent,
               damageTakenPercent,
+              mostMultiKills: mostMultiKills(),
             }
 
             return matchResponseData
@@ -256,40 +333,16 @@ export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatc
     )
 
     const rankMatches = matches.filter(match => match.queueId === 440 || match.queueId === 420)
+
+    const positions = rankMatches.map(el => el.playerMatchDatas.find(el => el.puuid === puuid).teamPosition)
     const champions = rankMatches.map(el => {
       const playMatchData = el.playerMatchDatas.find(el => el.puuid === puuid)
       const { kills, deaths, assists, champion, win } = playMatchData
       return { ...champion, kills, deaths, assists, win: win ? 1 : 0 }
     })
 
-    const playedChampions = champions.reduce((ac: { [key: string]: PlayedChampions }, v) => {
-      return {
-        ...ac,
-        [v.championName]: {
-          championId: v.championId,
-          championIcon: v.championIcon,
-          championName: v.championName,
-          kills: (ac[v.championName]?.kills || 0) + v.kills,
-          deaths: (ac[v.championName]?.deaths || 0) + v.deaths,
-          assists: (ac[v.championName]?.assists || 0) + v.assists,
-          win: (ac[v.championName]?.win || 0) + v.win,
-          matchNumber: (ac[v.championName]?.matchNumber || 0) + 1,
-        },
-      }
-    }, {})
-
-    const sortPlayedChampions: ResChampionCount[] = Object.values(playedChampions)
-      .sort((a, b) => b.matchNumber - a.matchNumber)
-      .map(({ championId, championName, championIcon, kills, deaths, assists, win, matchNumber }) => ({
-        championId,
-        championName,
-        championIcon,
-        kda: Number(((kills + assists) / deaths).toFixed(2)),
-        win,
-        loss: matchNumber - win,
-        winningRate: Math.round((win / matchNumber) * 100),
-        matchNumber,
-      }))
+    const playedPositions = getPlayedPositionCount(positions)
+    const playedChampions = getPlayedChampionCount(champions)
 
     const statistics = {
       totalMatchNumber,
@@ -300,7 +353,8 @@ export const getMatchHistory = async (puuid: string): Promise<{ matches: ResMatc
       averageAssists,
       averageKda,
       killParticipationRate,
-      playedChampions: sortPlayedChampions,
+      playedChampions,
+      playedPositions,
     }
     return { matches, statistics }
   } catch (err) {

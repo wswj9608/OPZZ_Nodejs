@@ -185,12 +185,13 @@ export interface RiotMatch {
   gameEndTimestamp: number
   gameId: number
   puuid: string
-  role: string
 
   mapId: number
   participants: {
     summonerSpells: any[]
     assists: number
+    role: string
+    lane: string
     champLevel: number
     championId: number
     championName: string
@@ -239,7 +240,7 @@ export interface RiotMatch {
     summonerLevel: number
     summonerName: string
     teamId: number
-    teamPosition: number
+    teamPosition: string
     tripleKills: number
     visionScore: number
     visionWardsBoughtInGame: number
@@ -307,6 +308,9 @@ export interface ResMatch {
   kills: number
   assists: number
   deaths: number
+  role: string
+  lane: string
+  teamPosition: string
   champion: ResChampion
   items: ResItem[]
   teamId: number
@@ -325,6 +329,7 @@ export interface ResMatch {
   totalDamageTaken: number
   damageDealtToChampionPercent: number
   damageTakenPercent: number
+  mostMultiKills: string
 }
 
 export interface ResTeam {
@@ -410,6 +415,13 @@ export interface PlayedChampions {
   championIcon: string
   championName: string
   matchNumber: number
+  kills: number
+  deaths: number
+  assists: number
+  win: number
+}
+
+export interface ChampionCountParam extends ResChampion {
   kills: number
   deaths: number
   assists: number
