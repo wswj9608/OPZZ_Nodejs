@@ -24,19 +24,19 @@ https://opzz-react.vercel.app
 ## **구현기능**
 
 - 소환사이름 검색 페이지
-  ![searchName](https://images-server-bucket.s3.ap-northeast-2.amazonaws.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA+2023-04-10+%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE+3.23.31.png)
+  ![searchName](https://images-server-bucket.s3.ap-northeast-2.amazonaws.com/resize-summonerSearch.jpg)
   
   <br>
   <br>
 
 - 소환사 전적 리스트 페이지
-  ![match](https://images-server-bucket.s3.ap-northeast-2.amazonaws.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA+2023-04-10+%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE+3.22.20.png)
+  ![match](https://images-server-bucket.s3.ap-northeast-2.amazonaws.com/resize-match.jpg)
 
   <br>
   <br>
 
 - 전적 상세내용 표시
-  ![matchDetail](https://images-server-bucket.s3.ap-northeast-2.amazonaws.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA+2023-04-10+%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE+3.22.52.png)
+  ![matchDetail](https://images-server-bucket.s3.ap-northeast-2.amazonaws.com/resize-matchDetail.jpg)
 
 <br>
 <br>
